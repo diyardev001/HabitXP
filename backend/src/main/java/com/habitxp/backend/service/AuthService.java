@@ -1,6 +1,7 @@
 package com.habitxp.backend.service;
 
 import com.habitxp.backend.dto.AuthResponse;
+import com.habitxp.backend.dto.LoginRequest;
 import com.habitxp.backend.dto.RegisterRequest;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.UserRepository;
@@ -33,6 +34,18 @@ public class AuthService {
                 .build();
 
         userRepository.save(user);
+
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token);
+    }
+
+    public AuthResponse login(LoginRequest request) {
+        User user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new RuntimeException("Invalid credentials");
+        }
 
         String token = jwtService.generateToken(user.getEmail());
         return new AuthResponse(token);

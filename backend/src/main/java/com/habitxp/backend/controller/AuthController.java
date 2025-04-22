@@ -1,6 +1,7 @@
 package com.habitxp.backend.controller;
 
 import com.habitxp.backend.dto.AuthResponse;
+import com.habitxp.backend.dto.LoginRequest;
 import com.habitxp.backend.dto.RegisterRequest;
 import com.habitxp.backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -20,5 +21,10 @@ public class AuthController {
     @PostMapping("/register")
     public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest request) {
         return ResponseEntity.ok(authService.register(request));
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<AuthResponse> login(@RequestBody LoginRequest request) {
+        return ResponseEntity.ok(authService.login(request));
     }
 }
