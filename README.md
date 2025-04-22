@@ -1,88 +1,153 @@
-# Template repository for the Software Engineering lecture
-
-> [!IMPORTANT]
-> Replace this README with a detailed description of your project, your team, and instructions on how to run it.
-
-> [!IMPORTANT]
-> If you choose to keep your repository private, make sure to invite all your team members and teaching staff. Ask for their usernames if needed.
-
-Provide a general introduction to your project. Describe the purpose, goals, and the technologies used. Explain the value your project offers.
+Dieses Readme ist Teil der App **"HabitXP"**, einer Habit-Tracking-Anwendung mit Gaming Mechanismen.
 
 ## Team
-List the team members involved in the project:
-
-Team Leader: [Name]
-
-Members: [Name1], [Name2], [Name3]
-(Expand this list as necessary)
-
-
+Members:
+[Dustin](https://www.github.com/),
+[Yassine](https://www.github.com/),
+[Diyar](https://www.github.com/diyardev001),
+[Kathrin](https://www.github.com/kathrinple)
 
 ## Quickstart
 
-This section outlines the steps required to get your project up and running quickly:
+### Backend
+Go to the project directory
 
-```bash,ignore
-# Example: Start a PostgreSQL database using Docker
-$ docker run --name some-postgres -e POSTGRES_PASSWORD=mysecretpassword -d postgres
+```bash, ignore
+  cd backend
+```
 
-# Example: Start the project (e.g., using Spring Boot)
-$ ./mvnw spring-boot:ru
+Start the server
+
+```bash, ignore
+  ./mvnw spring-boot:run
+```
+⚠️ MongoDB muss im Hintergrund laufen
+
+### Frontend
+Go to the project directory
+
+```bash, ignore
+  cd mobile
+```
+
+Start Expo
+```bash, ignore
+  npx expo start
+  
+  ODER
+  
+  npm run web
 ```
 
 ## Prerequisites
 
-Detail all the necessary prerequisites for running your project, such as:
+Operating System: Windows
 
-Operating System: (e.g., Linux, macOS, Windows)
-
-Software: Docker, Java, Maven
-
-Ports: (e.g., port 8080, if applicable)
+- Java 17+
+- Maven
+- MongoDB lokal installiert (läuft auf `mongodb://localhost:27017`)
 
 ## Installation and Setup
 
-Provide step-by-step instructions on how to clone the repository, install the project, and configure it:
-
 1. Clone the repository:
 ```bash,ignore
-$ git clone https://github.com/YourRepository.git
+$ git clone https://github.com/diyardev001/HabitXP.git
 ```
 
 2. Navigate to the project directory:
 ```bash,ignore
-$ cd ProjectName
+$ cd HabitXP
 ```
 
 3. Adjust configuration files:
 
 Modify configuration files (e.g., `.env`, `application.properties`) as required.
 
+## Authentifizierungs-Endpunkte
 
-## Running the Project
+#### Register
 
-Explain in detail how to run the project, including:
-
-Starting the database
-
-Initializing data (if needed, via scripts)
-
-Starting the server
-
-```bash,ignore
-# Example: Initialize the database
-$ ./init-db.sh
-
-# Start the project
-$ ./mvnw spring-boot:run
+```http
+  POST /auth/register
 ```
+
+| Parameter | Type     | Description                |
+| :-------- | :------- | :------------------------- |
+| `username` | `string` | **Required**. Username des Users |
+| `email` | `string` | **Required**. E-Mail-Adresse |
+| `password` | `string` | **Required**. Sicheres Passwort |
+
+#### Login
+
+```http
+  POST /auth/login
+```
+
+| Parameter | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `email`      | `string` | **Required**. E-Mail-Adresse |
+| `password`   | `string` | **Required**. Passwort |
+
+#### Get User Profile
+
+```http
+  GET /user/profile
+```
+
+| Header | Type     | Description                       |
+| :-------- | :------- | :-------------------------------- |
+| `Authorization` | `string` | **Required**. Bearer `<JWT_TOKEN>` |
 
 ## Project structure
 Provide an overview of the directory structure to help contributors navigate the project:
+
+### Backend
+Die Backend-Struktur basiert auf einem typischen Spring Boot Setup mit klarer Trennung von Verantwortlichkeiten:
+
 ```bash,ignore
-ProjectName/
-├── project_one/        # Description of this subproject
-├── docs/               # Documentation
-├── tests/              # Test cases
-└── README.md           # This file
+backend/
+├── .mvn/                     # Maven Wrapper Dateien
+├── src/
+│   ├── main/
+│   │   ├── java/
+│   │   │   └── com.habitxp.backend/
+│   │   │       ├── controller/       # REST Controller (Auth, User)
+│   │   │       ├── dto/              # Daten-Transfer-Objekte (LoginRequest, RegisterRequest, AuthResponse)
+│   │   │       ├── model/            # Datenmodelle (z.B. User)
+│   │   │       ├── repository/       # JPA/Mongo Repositories
+│   │   │       ├── security/         # JWT Konfiguration & Filter
+│   │   │       ├── service/          # Business-Logik (z.B. AuthService)
+│   │   │       └── BackendApplication.java  # Main-Klasse
+│   │   └── resources/
+│   │       ├── static/               # Statische Ressourcen (z.B. Bilder, JS)
+│   │       ├── templates/            # (optional) HTML-Templates
+│   │       └── application.properties # Konfigurationsdatei
+│
+├── test/                  # Testklassen
+├── mvnw / mvnw.cmd        # Maven Wrapper
+├── .gitignore
+├── README.md
+└── HELP.md
+```
+
+### Mobile (Frontend)
+Das mobile Frontend basiert auf Expo und folgt einer modularen Projektstruktur:
+
+```bash,ignore
+mobile/
+├── .expo/                   # Expo spezifische Cache-Daten
+├── app/                     # App Entry-Point und Routing
+│   ├── (tabs)/              # Tab-Navigation
+│   │   ├── _layout.tsx      # Hauptlayout für Tabs
+│   │   └── index.tsx        # Startseite (z.B. Dashboard)
+│
+├── assets/                  # Bilder, Fonts, etc.
+├── components/              # Wiederverwendbare UI-Komponenten
+├── node_modules/            # Abhängigkeiten
+├── app.json                 # Expo Konfiguration
+├── expo-env.d.ts            # TypeScript Setup für Expo-Module
+├── package.json             # Projektabhängigkeiten & Skripte
+├── tsconfig.json            # TypeScript Konfiguration
+├── .gitignore
+└── README.md
 ```
