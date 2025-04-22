@@ -4,6 +4,7 @@ import com.habitxp.backend.dto.AuthResponse;
 import com.habitxp.backend.dto.RegisterRequest;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.UserRepository;
+import com.habitxp.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class AuthService {
 
     private final UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
     public AuthResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
@@ -32,7 +34,7 @@ public class AuthService {
 
         userRepository.save(user);
 
-        // Todo: Temporär - Token kommt später
-        return new AuthResponse("placeholder-token");
+        String token = jwtService.generateToken(user.getEmail());
+        return new AuthResponse(token);
     }
 }
