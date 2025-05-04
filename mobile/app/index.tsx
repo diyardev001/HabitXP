@@ -1,15 +1,21 @@
-import { Text, View } from "react-native";
+import {useAuth} from "@/context/AuthContext";
+import {useRouter} from "expo-router";
+import {useEffect} from "react";
+import {ROUTES} from "@/routes";
 
-export default function Index() {
-  return (
-    <View
-      style={{
-        flex: 1,
-        justifyContent: "center",
-        alignItems: "center",
-      }}
-    >
-      <Text>Edit app/index.tsx to edit this screen.</Text>
-    </View>
-  );
+export default function IndexRedirect() {
+    const {token, isLoading} = useAuth();
+    const router = useRouter();
+
+    useEffect(() => {
+        if (!isLoading) {
+            if (token) {
+                router.replace(ROUTES.DASHBOARD);
+            } else {
+                router.replace(ROUTES.LOGIN);
+            }
+        }
+    }, [token, isLoading]);
+
+    return null;
 }
