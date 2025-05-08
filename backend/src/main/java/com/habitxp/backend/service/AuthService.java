@@ -29,7 +29,7 @@ public class AuthService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .xp(0)
                 .xpGoal(100) // Todo
-                .gold(0)
+                .coins(0)
                 .level(1)
                 .build();
 
