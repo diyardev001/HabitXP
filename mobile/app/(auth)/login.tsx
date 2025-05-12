@@ -1,36 +1,23 @@
 import {useAuth} from "@/context/AuthContext";
 import {useState} from "react";
-import {
-    Keyboard,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    TouchableWithoutFeedback,
-    View
-} from "react-native";
+import {Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
+import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view"
 import Container from "@/components/Container";
 import Title from "@/components/Title";
-import Subtitle from "@/components/Subtitle";
 import NormalText from "@/components/NormalText";
 import {router} from "expo-router";
 import Link from "@/components/Link";
 import SocialButton from "@/components/SocialButton";
 import PrimaryButton from "@/components/PrimaryButton";
 import {ROUTES} from "@/routes";
-import InputWithIcon from "@/components/InputWithIcon";
-import Checkbox from "expo-checkbox";
+import InputField from "@/components/InputField";
 import useTheme from "@/hooks/useTheme";
-import {Colors} from "@/constants/Colors";
 
 export default function Login() {
     const {login} = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-    const [remember, setRemember] = useState(false);
     const [loading, setLoading] = useState(false);
     const colors = useTheme();
 
@@ -47,71 +34,56 @@ export default function Login() {
     };
 
     return (
-        <KeyboardAvoidingView
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            style={{flex: 1, backgroundColor: colors.background}}
+        <KeyboardAwareScrollView
+            style={{backgroundColor: colors.background}}
+            contentContainerStyle={{flexGrow: 1}}
+            enableOnAndroid={true}
+            keyboardShouldPersistTaps={"handled"}
+            extraScrollHeight={20}
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
-                <ScrollView
-                    style={{backgroundColor: colors.background}}
-                    contentContainerStyle={{flexGrow: 1}}
-                    keyboardShouldPersistTaps={"handled"}
-                >
-                    <Container style={styles.container}>
-                        <Title>Willkommen zurück!</Title>
-                        <Subtitle>
-                            Melde dich an und behalte deine Gewohnheiten im Blick
-                        </Subtitle>
+                <Container style={styles.container}>
+                    <Title>Anmeldung</Title>
 
-                        <InputWithIcon
-                            label={"Email"}
-                            icon={"mail-outline"}
-                            value={email}
-                            onChangeText={setEmail}
-                            placeholder={"Email"}
-                        />
-                        <InputWithIcon
-                            label={"Passwort"}
-                            icon={"lock-closed-outline"}
-                            value={password}
-                            onChangeText={setPassword}
-                            placeholder={"Passwort"}
-                            secureTextEntry={true}
-                        />
+                    <InputField
+                        label={"Email"}
+                        icon={"mail-outline"}
+                        value={email}
+                        onChangeText={setEmail}
+                        placeholder={"Email"}
+                    />
+                    <InputField
+                        label={"Passwort"}
+                        icon={"lock-closed-outline"}
+                        value={password}
+                        onChangeText={setPassword}
+                        placeholder={"Passwort"}
+                        secureTextEntry={true}
+                    />
 
-                        <View style={styles.rowBetween}>
-                            <View style={styles.checkboxRow}>
-                                <Checkbox color={Colors.dark.primary} style={styles.checkbox} value={remember}
-                                          onValueChange={setRemember}/>
-                                <Text style={styles.checkboxText}>Merken</Text>
-                            </View>
-                            <TouchableOpacity>
-                                <Text style={styles.forgotPassword}>Passwort vergessen?</Text>
-                            </TouchableOpacity>
-                        </View>
+                    {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
 
-                        {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
+                    <PrimaryButton title={"Einloggen"} onPress={handleLogin} loading={loading}/>
 
-                        <View style={styles.orContainer}>
-                            <View style={styles.line}/>
-                            <Text style={styles.orText}>ODER</Text>
-                            <View style={styles.line}/>
-                        </View>
+                    <View style={styles.orContainer}>
+                        <View style={styles.line}/>
+                        <Text style={styles.orText}>ODER</Text>
+                        <View style={styles.line}/>
+                    </View>
 
-                        <SocialButton iconName={"logo-google"} text={"Mit Google fortfahren"}/>
-                        <SocialButton iconName={"logo-apple"} text={"Mit Apple fortfahren"}/>
+                    <View style={styles.socialRow}>
+                        <SocialButton iconName={"logo-google"}/>
+                        <SocialButton iconName={"logo-apple"}/>
+                    </View>
 
-                        <PrimaryButton title={"Einloggen"} onPress={handleLogin} loading={loading}/>
-
-                        <TouchableOpacity onPress={() => router.replace(ROUTES.REGISTER)}>
-                            <NormalText style={styles.signUpLink}>
-                                Noch keinen Account? <Link>Registrieren</Link>
-                            </NormalText>
-                        </TouchableOpacity>
-                    </Container>
-                </ScrollView>
+                    <TouchableOpacity onPress={() => router.replace(ROUTES.REGISTER)}>
+                        <NormalText style={styles.signUpLink}>
+                            Noch keinen Account? <Link>Registrieren</Link>
+                        </NormalText>
+                    </TouchableOpacity>
+                </Container>
             </TouchableWithoutFeedback>
-        </KeyboardAvoidingView>
+        </KeyboardAwareScrollView>
 
     );
 }
@@ -121,29 +93,6 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         padding: 20,
     },
-    rowBetween: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 15,
-        marginTop: 10
-    },
-    checkboxRow: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    checkbox: {
-        borderColor: Colors.dark.primary,
-        borderWidth: 2,
-        width: 20,
-        height: 20,
-        borderRadius: 4,
-    },
-    checkboxText: {
-        marginLeft: 8,
-        color: "#aaa",
-    },
-    forgotPassword: {color: "#aaa"},
     error: {color: "red", marginBottom: 12},
     orContainer: {
         flexDirection: "row",
@@ -154,6 +103,10 @@ const styles = StyleSheet.create({
         flex: 1,
         height: 1,
         backgroundColor: "#333",
+    },
+    socialRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
     },
     orText: {
         marginHorizontal: 10,
