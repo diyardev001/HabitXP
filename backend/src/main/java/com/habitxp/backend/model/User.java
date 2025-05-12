@@ -4,12 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.util.List;
-
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @Builder
@@ -21,7 +20,8 @@ public class User {
     @Id
     private String id;
 
-    private String name;
+    private String firstName;
+    private String lastName;
     private String username;
     private String email;
     private String password;
@@ -75,7 +75,7 @@ public class User {
         this.xpGoal = (int) Math.round(100 * Math.pow(1.2, level));
     }
 
-    public void xpFactorReset(){
+    public void xpFactorReset() {
         if (xpFactorUntil != null && Instant.now().isAfter(xpFactorUntil)) {
             xpFactor = 1;
             xpFactorUntil = null;
@@ -90,6 +90,6 @@ public class User {
     }
 
     public void addFriend(String friendUserId) {
-        
+
     }
 } 
