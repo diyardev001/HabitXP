@@ -46,6 +46,10 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
     }, [token, segments, isLoading]);
 
     const login = async (email: string, password: string) => {
+        // "username": "test",
+        // "email": "te@example.com",
+        // "password": "1234"
+
         try {
             const res = await api.post('/auth/login', {email, password});
             const jwt = res.data.token;
