@@ -1,8 +1,8 @@
-import React, {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 import * as SecureStore from 'expo-secure-store';
 import {router, useSegments} from "expo-router";
 import api from "@/lib/api";
-import {AuthContextType, User} from "@/types/auth";
+import {AuthContextType, RegisterRequest, User} from "@/types/auth";
 import {ROUTES} from "@/routes";
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -59,8 +59,8 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
         }
     };
 
-    const register = async (username: string, email: string, password: string) => {
-        const res = await api.post('/auth/register', {username, email, password});
+    const register = async (data: RegisterRequest) => {
+        const res = await api.post('/auth/register', data);
         const jwt = res.data.token;
         await SecureStore.setItemAsync('token', jwt);
         api.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
@@ -77,8 +77,17 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
         router.replace(ROUTES.LOGIN);
     };
 
+    const contextValue = useMemo(() => ({
+        user,
+        token,
+        login,
+        register,
+        logout,
+        isLoading
+    }), [user, token, isLoading]);
+
     return (
-        <AuthContext.Provider value={{user, token, login, register, logout, isLoading}}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );
