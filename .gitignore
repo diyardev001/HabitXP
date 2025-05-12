@@ -116,3 +116,8 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
+
+#IDE
+.idea/
+*.iml
+backend/src/main/resources/application.properties
