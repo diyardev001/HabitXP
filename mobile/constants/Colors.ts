@@ -8,7 +8,7 @@ export const Colors = {
         secondary: "#515357",
     },
     dark: {
-        background: "#181a20",
+        background: "#020d1b",
         title: "#fff",
         subtitle: "#a4a4a7",
         input: "#1f222a",
