@@ -7,29 +7,31 @@ type IconName = ComponentProps<typeof Ionicons>["name"];
 
 type SocialButtonProps = {
     iconName: IconName;
-    text: string
+    text?: string;
 };
 
 export default function SocialButton({iconName, text}: Readonly<SocialButtonProps>) {
     const colors = useTheme();
     return (
-        <TouchableOpacity style={[styles.button, {backgroundColor: colors.input}]}>
-            <Ionicons name={iconName} size={20} color={colors.title}/>
-            <Text style={[styles.text, {color: colors.title}]}>{text}</Text>
+        <TouchableOpacity
+            style={[styles.button, {backgroundColor: colors.input}]}>
+            <Ionicons name={iconName} size={24} color={colors.title}/>
+            {text && <Text style={[styles.text, {color: colors.title}]}>{text}</Text>}
         </TouchableOpacity>
     );
 }
 
 const styles = StyleSheet.create({
     button: {
-        flexDirection: "row",
-        padding: 14,
-        borderRadius: 10,
+        flex: 1,
+        borderRadius: 12,
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 12,
+        paddingVertical: 15,
+        marginHorizontal: 6,
     },
     text: {
         marginLeft: 10,
+        fontSize: 16
     },
 });

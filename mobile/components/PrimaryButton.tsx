@@ -24,11 +24,12 @@ export default function PrimaryButton({title, loading = false, onPress}: Readonl
 const styles = StyleSheet.create({
     button: {
         padding: 16,
-        borderRadius: 10,
+        borderRadius: 14,
         alignItems: "center",
-        marginBottom: 16,
+        marginVertical: 10,
     },
     text: {
         fontWeight: "600",
+        fontSize: 16
     },
 });
