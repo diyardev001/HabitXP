@@ -1,6 +1,4 @@
 import { StyleSheet, Text, View } from 'react-native';
-import React from 'react';
-import { EvilIcons } from '@expo/vector-icons';
 
 interface CardProps {
   description: string;
@@ -11,6 +9,7 @@ interface CardProps {
   frequency: string;
   done: boolean;
   bgcolor: string;
+  accent: string;
 }
 
 export default function Card({
@@ -19,60 +18,90 @@ export default function Card({
   frequency,
   done,
   bgcolor,
+  accent,
 }: CardProps) {
   const styles = StyleSheet.create({
     container: {
       flexDirection: 'column',
-      padding: 20,
-      borderRadius: 6,
-      elevation: 5,
-      marginBottom: 10,
-      width: '100%',
+      gap: 70,
+      padding: 8,
+      borderRadius: 20,
+      marginBottom: 18,
+      marginHorizontal: 2,
       backgroundColor: bgcolor,
+    },
+    duration: {
+      fontSize: 16,
+      color: '#fff',
+      fontWeight: '700',
     },
     label: {
       fontSize: 16,
       color: '#fff',
       fontWeight: 'bold',
-      marginBottom: 5,
+    },
+    deadline: {
+      alignSelf: 'flex-end',
+      paddingLeft: 16,
+      fontSize: 16,
+      color: '#fff',
+      fontWeight: '600',
+    },
+    top: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'flex-start',
+    },
+    timeBadge: {
+      flexDirection: 'row',
+      alignItems: 'center',
+      paddingVertical: 5,
+      paddingHorizontal: 12,
+      borderRadius: 50,
+      backgroundColor: accent,
+    },
+    checkIconContainer: {
+      backgroundColor: accent,
+      borderRadius: 999,
+      justifyContent: 'center',
+      alignItems: 'center',
     },
   });
 
   return (
     <View style={styles.container}>
-      <View style={{ marginBottom: 50 }}>
-        <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-          <Text style={styles.label}>{deadline.duration} MIN</Text>
-          {/* <EditIcon */}
-          <EvilIcons
-            name="check"
-            size={24}
-            color={done ? 'white' : 'white'}
-            style={{ marginRight: 2 }}
-          />
+      <View>
+        <View style={styles.top}>
+          {/* Badge */}
+          <View style={styles.timeBadge}>
+            <Text style={styles.duration}>{deadline.duration} MIN</Text>
+          </View>
+          <View style={[styles.checkIconContainer, { padding: 18 }]}></View>
         </View>
-        <View style={{ flexDirection: 'row' }}>
-          {/* <HabitIcon */}
-          <EvilIcons
-            name="check"
-            size={24}
-            color={done ? 'white' : 'white'}
-            style={{ marginRight: 2 }}
-          />
+        <View
+          style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}
+        >
+          {/* Optional: Icon für den Habit */}
+          <View
+            style={[styles.checkIconContainer, { padding: 14, marginRight: 4 }]}
+          ></View>
+
           <Text style={styles.label}>{description}</Text>
         </View>
       </View>
-      <View style={{ flexDirection: 'row', justifyContent: 'space-between' }}>
-        <Text style={styles.label}>
+      <View
+        style={{
+          flexDirection: 'row',
+          justifyContent: 'space-between',
+        }}
+      >
+        <Text style={styles.deadline}>
           {frequency}: {deadline.time}
         </Text>
-        {/* <CheckIcon?? */}
-        <EvilIcons
-          name="check"
-          size={24}
-          color={done ? 'white' : 'white'}
-          style={{ marginRight: 2 }}
-        />
+        {/* Noch ein Check-Icon mit Accent (optional) */}
+        <View
+          style={[styles.checkIconContainer, { marginRight: 14, padding: 26 }]}
+        ></View>
       </View>
     </View>
   );
