@@ -1,5 +1,5 @@
 import { Colors } from '@/constants/Colors';
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   FlatList,
   StyleSheet,
@@ -43,6 +43,30 @@ const testData = [
     accent: Colors.habit.cyan.ac,
   },
   {
+    description: 'Wasser trinken',
+    deadline: { duration: '1', time: '11:30' },
+    frequency: 'Täglich',
+    done: true,
+    bgcolor: Colors.habit.cyan.bg,
+    accent: Colors.habit.cyan.ac,
+  },
+  {
+    description: 'Wasser trinken',
+    deadline: { duration: '1', time: '17:30' },
+    frequency: 'Täglich',
+    done: true,
+    bgcolor: Colors.habit.cyan.bg,
+    accent: Colors.habit.cyan.ac,
+  },
+  {
+    description: 'Wasser trinken',
+    deadline: { duration: '1', time: '20:30' },
+    frequency: 'Täglich',
+    done: true,
+    bgcolor: Colors.habit.cyan.bg,
+    accent: Colors.habit.cyan.ac,
+  },
+  {
     description: 'Backen',
     deadline: { duration: '60', time: '15:00' },
     frequency: 'Sa, So',
@@ -68,35 +92,55 @@ const testData = [
   },
 ];
 
+const isHabitToday = (frequency: string) => {
+  if (frequency === 'Täglich') return true;
+
+  const daysMap: { [key: string]: number } = {
+    Mo: 1,
+    Di: 2,
+    Mi: 3,
+    Do: 4,
+    Fr: 5,
+    Sa: 6,
+    So: 0,
+  };
+
+  const today = new Date().getDay();
+  const habitDays = frequency.split(', ');
+
+  return habitDays.some(day => daysMap[day] === today);
+};
+
+const timeToMinutes = (time: string) => {
+  const [hours, minutes] = time.split(':').map(Number);
+  return hours * 60 + minutes;
+};
+
 export default function List() {
   const [selectedIndex, setSelectedIndex] = useState(0);
-
   const options = ['Heute', 'Woche', 'Alle'];
 
-  const filteredData =
-    selectedIndex === 0
-      ? testData
-          .filter(item => item.frequency === 'Täglich')
-          .sort((a, b) => {
-            const timeA = a.deadline.time.split(':').map(Number);
-            const timeB = b.deadline.time.split(':').map(Number);
-            return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
-          })
-      : selectedIndex === 1
-      ? testData
-          .filter(item => item.frequency !== 'Täglich')
-          .sort((a, b) => {
-            const timeA = a.deadline.time.split(':').map(Number);
-            const timeB = b.deadline.time.split(':').map(Number);
-            return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
-          })
-      : testData.sort((a, b) => {
-          const timeA = a.deadline.time.split(':').map(Number);
-          const timeB = b.deadline.time.split(':').map(Number);
-          return timeA[0] * 60 + timeA[1] - (timeB[0] * 60 + timeB[1]);
-        });
+  const filteredData = useMemo(() => {
+    let filtered = [...testData];
+
+    filtered.sort((a, b) => {
+      return timeToMinutes(a.deadline.time) - timeToMinutes(b.deadline.time);
+    });
+
+    switch (selectedIndex) {
+      case 0:
+        return filtered.filter(
+          item => item.frequency === 'Täglich' || isHabitToday(item.frequency),
+        );
+      case 1:
+        return filtered.filter(item => item.frequency !== 'Täglich');
+      default:
+        return filtered;
+    }
+  }, [selectedIndex]);
+
   return (
-    <View style={{flex:1}}>
+    <View style={{ flex: 1 }}>
       <View style={styles.filterContainer}>
         {options.map((label, index) => (
           <TouchableOpacity
@@ -157,7 +201,7 @@ const styles = StyleSheet.create({
   optionText: {
     color: '#909396',
     fontSize: 16,
-    fontWeight:"600"
+    fontWeight: '600',
   },
   optionTextSelected: {
     color: 'white',
