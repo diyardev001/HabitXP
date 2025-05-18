@@ -1,4 +1,3 @@
-import { View, Text, StyleSheet, ImageBackground } from 'react-native';
 import List from '@/components/habit/HabitList';
 import GamificationCard from '@/components/gamification/GamificationCard';
 import Container from '@/components/Container';

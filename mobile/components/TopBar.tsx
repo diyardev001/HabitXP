@@ -1,11 +1,28 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
 import React from 'react';
+import { Ionicons } from '@expo/vector-icons';
 
-const TopBar = () => {
+interface TopBarProps {
+  onPressAdd?: () => void;
+}
+
+const TopBar = ({ onPressAdd }: TopBarProps) => {
+  const handlePress = () => {
+    if (onPressAdd) {
+      onPressAdd();
+    }
+  };
+
   return (
     <View style={styles.top}>
       <Text style={styles.name}>Jonas</Text>
-      <View style={styles.editBtn}></View>
+      <TouchableOpacity 
+        style={styles.editBtn} 
+        onPress={handlePress}
+        activeOpacity={0.7}
+      >
+        <Ionicons name="add" size={32} color="white" />
+      </TouchableOpacity>
     </View>
   );
 };
@@ -26,7 +43,8 @@ const styles = StyleSheet.create({
     fontWeight: '400',
   },
   editBtn: {
-    backgroundColor: 'white',
-    padding: 18,
+    padding: 8,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
