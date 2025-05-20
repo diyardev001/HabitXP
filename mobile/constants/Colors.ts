@@ -17,7 +17,7 @@ export const Colors = {
   },
   habit: {
     coral: { bg: '#EF5151', ac: '#F97F7F' },
-    blue: { bg: '#4285F4', ac: '#6FC4FF' },
+    blue: { bg: '#4285F4', ac: '#609dfa' },
     yellow: { bg: '#FFB300', ac: '#FFE082' },
     green: { bg: '#2eae62', ac: '#49cc7f' },
     pink: { bg: '#EC4E91', ac: '#FF91C7' },
