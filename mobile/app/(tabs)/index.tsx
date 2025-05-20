@@ -1,5 +1,5 @@
 import List from '@/components/habit/HabitList';
-import GamificationCard from '@/components/gamification/GamificationCard';
+import GamificationCard from '@/components/Gamification/GamificationCard';
 import Container from '@/components/Container';
 import TopBar from '@/components/TopBar';
 
