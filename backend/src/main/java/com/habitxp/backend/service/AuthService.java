@@ -12,6 +12,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.ArrayList;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -44,10 +46,15 @@ public class AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .xp(0)
-                .xpGoal(100) // Todo
+                .xpGoal(100)
                 .coins(0)
                 .level(1)
+                .health(100) // z. B. Standardwert
+                .currentXP(0)
+                .spaceIds(new ArrayList<>())
+                .bonusIds(new ArrayList<>())
                 .build();
+
 
         userRepository.save(user);
 
