@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
+import { Ionicons } from '@expo/vector-icons';
+import { StyleSheet, Text, View, Image, TouchableOpacity } from 'react-native';
 
 interface CardProps {
   description: string;
@@ -30,10 +31,20 @@ export default function Card({
       marginHorizontal: 2,
       backgroundColor: bgcolor,
     },
+    editButton: {
+      backgroundColor: accent,
+      padding: 10,
+      borderRadius: 20,
+      justifyContent: 'center',
+      alignItems: 'center',
+      opacity: 0.8,
+    },
+
     duration: {
       fontSize: 16,
       color: '#fff',
-      fontWeight: '700',
+      fontWeight: '800',
+      padding: 2,
     },
     label: {
       fontSize: 16,
@@ -59,12 +70,7 @@ export default function Card({
       paddingHorizontal: 12,
       borderRadius: 50,
       backgroundColor: accent,
-    },
-    checkIconContainer: {
-      backgroundColor: accent,
-      borderRadius: 999,
-      justifyContent: 'center',
-      alignItems: 'center',
+      opacity: 0.8,
     },
   });
 
@@ -76,15 +82,17 @@ export default function Card({
           <View style={styles.timeBadge}>
             <Text style={styles.duration}>{deadline.duration} MIN</Text>
           </View>
-          <View style={[styles.checkIconContainer, { padding: 18 }]}></View>
+          <TouchableOpacity style={styles.editButton}>
+            <Ionicons name="ellipsis-vertical" size={16} color="white" />
+          </TouchableOpacity>
         </View>
         <View
           style={{ flexDirection: 'row', alignItems: 'center', marginTop: 10 }}
         >
-          {/* Optional: Icon für den Habit */}
-          <View
-            style={[styles.checkIconContainer, { padding: 14, marginRight: 4 }]}
-          ></View>
+          <Image
+            style={[{ padding: 12, marginRight: 4 }]}
+            source={require('@/assets/images/icons/habit/timer.png')}
+          />
 
           <Text style={styles.label}>{description}</Text>
         </View>
@@ -98,10 +106,12 @@ export default function Card({
         <Text style={styles.deadline}>
           {frequency}: {deadline.time}
         </Text>
-        {/* Noch ein Check-Icon mit Accent (optional) */}
-        <View
-          style={[styles.checkIconContainer, { marginRight: 14, padding: 26 }]}
-        ></View>
+        <TouchableOpacity>
+          <Image
+            source={require('@/assets/images/icons/home/check.png')}
+            style={{ width: 50, height: 50, marginRight: 10 }}
+          />
+        </TouchableOpacity>
       </View>
     </View>
   );

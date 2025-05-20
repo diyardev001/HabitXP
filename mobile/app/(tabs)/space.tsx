@@ -17,7 +17,7 @@ const Space = () => {
 
   return (
     <Container>
-      <TopBar onPressAdd={handleAddPress} />
+      <TopBar onPressAdd={handleAddPress} tab="space" />
       <SpaceList shouldShowModal={shouldShowModal} />
     </Container>
   );
