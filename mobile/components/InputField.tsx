@@ -1,6 +1,7 @@
 import {StyleSheet, Text, TextInput, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import useTheme from "@/hooks/useTheme";
+import {useState} from "react";
 
 type Props = {
     label?: string;
@@ -22,6 +23,7 @@ export default function InputField({
                                        style
                                    }: Readonly<Props>) {
     const colors = useTheme();
+    const [isSecure, setIsSecure] = useState(!!secureTextEntry);
 
     return (
         <View style={[styles.container, style]}>
@@ -45,8 +47,18 @@ export default function InputField({
                     style={[styles.input, {color: colors.title}]}
                     value={value}
                     onChangeText={onChangeText}
-                    secureTextEntry={secureTextEntry}
+                    secureTextEntry={isSecure}
                 />
+
+                {secureTextEntry && (
+                    <Ionicons
+                        name={isSecure ? "eye-off" : "eye"}
+                        size={20}
+                        color={colors.subtitle}
+                        onPress={() => setIsSecure(!isSecure)}
+                        style={{marginLeft: 10}}
+                    />
+                )}
             </View>
         </View>
     );

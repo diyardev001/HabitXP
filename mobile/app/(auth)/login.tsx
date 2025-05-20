@@ -1,13 +1,12 @@
 import {useAuth} from "@/context/AuthContext";
 import {useState} from "react";
-import {Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
+import {Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback} from "react-native";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view"
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import NormalText from "@/components/NormalText";
 import {router} from "expo-router";
 import Link from "@/components/Link";
-import SocialButton from "@/components/SocialButton";
 import PrimaryButton from "@/components/PrimaryButton";
 import {ROUTES} from "@/routes";
 import InputField from "@/components/InputField";
@@ -64,17 +63,6 @@ export default function Login() {
                     {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
 
                     <PrimaryButton title={"Einloggen"} onPress={handleLogin} loading={loading}/>
-
-                    <View style={styles.orContainer}>
-                        <View style={styles.line}/>
-                        <Text style={styles.orText}>ODER</Text>
-                        <View style={styles.line}/>
-                    </View>
-
-                    <View style={styles.socialRow}>
-                        <SocialButton iconName={"logo-google"}/>
-                        <SocialButton iconName={"logo-apple"}/>
-                    </View>
 
                     <TouchableOpacity onPress={() => router.replace(ROUTES.REGISTER)}>
                         <NormalText style={styles.signUpLink}>

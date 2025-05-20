@@ -1,12 +1,11 @@
 import {useAuth} from "@/context/AuthContext";
 import {useState} from "react";
-import {Keyboard, StyleSheet, Text, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
+import {Keyboard, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, View} from "react-native";
 import {router} from "expo-router";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import Link from "@/components/Link";
 import NormalText from "@/components/NormalText";
-import SocialButton from "@/components/SocialButton";
 import PrimaryButton from "@/components/PrimaryButton";
 import {ROUTES} from "@/routes";
 import InputField from "@/components/InputField";
@@ -120,17 +119,6 @@ export default function RegisterScreen() {
                     {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
 
                     <PrimaryButton title={"Registrieren"} loading={loading} onPress={handleRegister}/>
-
-                    <View style={styles.orContainer}>
-                        <View style={styles.line}/>
-                        <Text style={styles.orText}>ODER</Text>
-                        <View style={styles.line}/>
-                    </View>
-
-                    <View style={styles.socialRow}>
-                        <SocialButton iconName={"logo-google"}/>
-                        <SocialButton iconName={"logo-apple"}/>
-                    </View>
 
                     <TouchableOpacity onPress={() => router.replace(ROUTES.LOGIN)}>
                         <NormalText style={styles.signInLink}>

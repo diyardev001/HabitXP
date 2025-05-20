@@ -35,4 +35,3 @@ export const Colors = {
     selected: '#ffa29c',
     saved: '#212121',
   },
-};
