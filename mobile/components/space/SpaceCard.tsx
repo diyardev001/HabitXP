@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, TouchableOpacity, Image } from 'react-native';
 import React, { useState } from 'react';
 import HabitCard from './HabitCard';
 import { Ionicons } from '@expo/vector-icons';
@@ -51,7 +51,10 @@ const SpaceCard = ({ name, xp, xpMax, coins, data }: SpaceProps) => {
             </View>
             <View style={styles.coinContainer}>
               {/* Coin Icon */}
-              <Text style={styles.stats}>{coins}</Text>
+              <Image
+                source={require('@/assets/images/icons/gamification/coin.png')}
+              />
+              <Text style={styles.stats}>{coins}</Text>{' '}
             </View>
           </View>
         </View>
