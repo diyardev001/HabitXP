@@ -19,13 +19,22 @@ public class JwtService {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
-    private final long EXPIRATION_TIME = 1000 * 60 * 60 * 24; // 24h
+    private final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 Minuten
+    private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 Tage
 
-    public String generateToken(String userEmail) {
+    public String generateAccessToken(String userEmail) {
+        return buildToken(userEmail, ACCESS_EXPIRATION);
+    }
+
+    public String generateRefreshToken(String userEmail) {
+        return buildToken(userEmail, REFRESH_EXPIRATION);
+    }
+
+    public String buildToken(String subject, long expiration) {
         return Jwts.builder()
-                .setSubject(userEmail)
+                .setSubject(subject)
                 .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+                .setExpiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey(), SignatureAlgorithm.HS256)
                 .compact();
     }
@@ -37,5 +46,17 @@ public class JwtService {
                 .parseClaimsJws(token)
                 .getBody()
                 .getSubject();
+    }
+
+    public boolean isTokenValid(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
     }
 }
