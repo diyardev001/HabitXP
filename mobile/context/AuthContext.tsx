@@ -1,8 +1,8 @@
-import React, {createContext, useContext, useEffect, useState} from "react";
+import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 import * as SecureStore from 'expo-secure-store';
 import {router, useSegments} from "expo-router";
-import api from "@/lib/api";
-import {AuthContextType, User} from "@/types/auth";
+import api from "@/services/api";
+import {AuthContextType, RegisterRequest, User} from "@/types/auth";
 import {ROUTES} from "@/routes";
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -17,7 +17,7 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
     useEffect(() => {
         const loadSession = async () => {
             try {
-                const storedToken = await SecureStore.getItemAsync('token');
+                const storedToken = await SecureStore.getItemAsync('accessToken');
                 if (storedToken) {
                     api.defaults.headers.common['Authorization'] = `Bearer ${storedToken}`;
                     const res = await api.get('/user/profile');
@@ -52,37 +52,56 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
 
         try {
             const res = await api.post('/auth/login', {email, password});
-            const jwt = res.data.token;
-            await SecureStore.setItemAsync('token', jwt);
-            api.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
-            setUser(res.data.user);
-            setToken(jwt);
+            const {accessToken, refreshToken} = res.data;
+
+            await Promise.all([
+                SecureStore.setItemAsync('refreshToken', refreshToken),
+                SecureStore.setItemAsync('accessToken', accessToken),
+            ]);
+
+            api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
+            setToken(accessToken);
+
+            const profile = await api.get("/user/profile");
+            setUser(profile.data);
         } catch (error: any) {
             console.log("Login fehlgeschlagen:", error.response?.data || error.message);
             throw error;
         }
     };
 
-    const register = async (username: string, email: string, password: string) => {
-        const res = await api.post('/auth/register', {username, email, password});
-        const jwt = res.data.token;
-        await SecureStore.setItemAsync('token', jwt);
-        api.defaults.headers.common['Authorization'] = `Bearer ${jwt}`;
+    const register = async (data: RegisterRequest) => {
+        const res = await api.post('/auth/register', data);
+        const {accessToken, refreshToken} = res.data;
+        await SecureStore.setItemAsync('accessToken', accessToken);
+        await SecureStore.setItemAsync('refreshToken', refreshToken);
+
+        api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
         const profile = await api.get("/user/profile");
         setUser(profile.data);
-        setToken(jwt);
+        setToken(accessToken);
         router.replace(ROUTES.DASHBOARD);
     };
 
     const logout = async () => {
-        await SecureStore.deleteItemAsync('token');
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
         setUser(null);
         setToken(null);
         router.replace(ROUTES.LOGIN);
     };
 
+    const contextValue = useMemo(() => ({
+        user,
+        token,
+        login,
+        register,
+        logout,
+        isLoading
+    }), [user, token, isLoading]);
+
     return (
-        <AuthContext.Provider value={{user, token, login, register, logout, isLoading}}>
+        <AuthContext.Provider value={contextValue}>
             {children}
         </AuthContext.Provider>
     );
