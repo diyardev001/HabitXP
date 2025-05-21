@@ -9,7 +9,7 @@ type TextProps = {
 
 export default function NormalText({children, style}: Readonly<TextProps>) {
     const colors = useTheme();
-    return <Text style={[styles.text, {color: colors.subtitle}, style]}>{children}</Text>;
+    return <Text style={[styles.text, {color: colors.title}, style]}>{children}</Text>;
 }
 
 const styles = StyleSheet.create({
