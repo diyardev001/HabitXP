@@ -18,6 +18,8 @@ public class Space {
     private String id;
 
     private String name;
+
+    private int userId;
     private List<String> taskIds;
 
     public void addTask(String taskId) {

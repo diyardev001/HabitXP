@@ -26,6 +26,7 @@ public class Task {
     private Frequency frequency;
     private int streak;
 
+    private int userId;
     private String spaceId;
 
     public void edit(String title, String description, LocalDate deadline, Frequency frequency) {
