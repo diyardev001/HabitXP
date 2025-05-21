@@ -79,7 +79,8 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
     };
 
     const logout = async () => {
-        await SecureStore.deleteItemAsync('token');
+        await SecureStore.deleteItemAsync('accessToken');
+        await SecureStore.deleteItemAsync('refreshToken');
         setUser(null);
         setToken(null);
         router.replace(ROUTES.LOGIN);
