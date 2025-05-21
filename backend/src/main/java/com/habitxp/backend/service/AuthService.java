@@ -39,6 +39,9 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already in use");
         }
 
+        String accessToken = jwtService.generateAccessToken(request.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(request.getEmail());
+
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -53,13 +56,13 @@ public class AuthService {
                 .currentXP(0)
                 .spaceIds(new ArrayList<>())
                 .bonusIds(new ArrayList<>())
+                .refreshToken(refreshToken)
                 .build();
 
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token);
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -70,8 +73,14 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token);
+        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new AuthResponse(accessToken, refreshToken);
+    }
 
     public User getUserByEmail(String email) {
         return userRepository.findByEmail(email)
