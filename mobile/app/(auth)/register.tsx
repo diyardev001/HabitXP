@@ -71,7 +71,7 @@ export default function RegisterScreen() {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <Container style={styles.container}>
-                    <Title>Registrierung</Title>
+                    <Title style={styles.title}>Registrierung</Title>
 
                     <View style={styles.row}>
                         <InputField
@@ -133,6 +133,9 @@ export default function RegisterScreen() {
 
 const styles = StyleSheet.create({
     container: {padding: 20, justifyContent: "center"},
+    title: {
+        marginBottom: 24,
+    },
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
