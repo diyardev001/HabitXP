@@ -1,0 +1,52 @@
+package com.habitxp.backend.model;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
+
+@Data
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Document(collection = "habits")
+public class Habit {
+
+    @Id
+    private String id;
+    private String userId;
+
+    private String title;
+    private LocalDate deadline;
+    private boolean isCompleted;
+
+    private int rewardXP;
+    private int rewardCoins;
+    private Frequency frequency;
+    private int streak;
+
+    private String spaceId;
+    private String color;
+
+    public void edit(String title, LocalDate deadline, Frequency frequency) {
+        this.title = title;
+        this.deadline = deadline;
+        this.frequency = frequency;
+    }
+
+    public void markAsCompleted(User user) {
+        this.isCompleted = true;
+        this.streak += 1;
+        user.setCoins(user.getCoins() + rewardCoins);
+        user.xpFactorReset();
+        user.setXp(user.getXp() + rewardXP * user.getXpFactor());
+    }
+
+    public boolean streakAlive() {
+        return this.streak > 0;
+    }
+} 
