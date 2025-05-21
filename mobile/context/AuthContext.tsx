@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 import * as SecureStore from 'expo-secure-store';
 import {router, useSegments} from "expo-router";
-import api from "@/lib/api";
+import api from "@/services/api";
 import {AuthContextType, RegisterRequest, User} from "@/types/auth";
 import {ROUTES} from "@/routes";
 
@@ -53,12 +53,17 @@ export const AuthProvider = ({children}: { children: React.ReactNode }) => {
         try {
             const res = await api.post('/auth/login', {email, password});
             const {accessToken, refreshToken} = res.data;
-            await SecureStore.setItemAsync('accessToken', accessToken);
-            await SecureStore.setItemAsync('refreshToken', refreshToken);
+
+            await Promise.all([
+                SecureStore.setItemAsync('refreshToken', refreshToken),
+                SecureStore.setItemAsync('accessToken', accessToken),
+            ]);
 
             api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
-            setUser(res.data.user);
             setToken(accessToken);
+
+            const profile = await api.get("/user/profile");
+            setUser(profile.data);
         } catch (error: any) {
             console.log("Login fehlgeschlagen:", error.response?.data || error.message);
             throw error;
