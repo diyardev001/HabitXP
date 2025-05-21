@@ -60,4 +60,15 @@ api.interceptors.response.use(
     }
 )
 
+api.interceptors.request.use(
+    async (config) => {
+        const token = await SecureStore.getItemAsync("accessToken");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+        return config;
+    },
+    error => Promise.reject(error)
+);
+
 export default api;

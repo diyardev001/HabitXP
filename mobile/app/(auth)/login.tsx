@@ -42,7 +42,7 @@ export default function Login() {
         >
             <TouchableWithoutFeedback onPress={Keyboard.dismiss}>
                 <Container style={styles.container}>
-                    <Title>Anmeldung</Title>
+                    <Title style={styles.title}>Anmeldung</Title>
 
                     <InputField
                         label={"Email"}
@@ -80,6 +80,9 @@ const styles = StyleSheet.create({
     container: {
         justifyContent: "center",
         padding: 20,
+    },
+    title: {
+        marginBottom: 24,
     },
     error: {color: "red", marginBottom: 12},
     orContainer: {

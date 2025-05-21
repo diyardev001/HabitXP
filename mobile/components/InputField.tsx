@@ -1,4 +1,4 @@
-import {StyleSheet, Text, TextInput, View} from "react-native";
+import {KeyboardTypeOptions, StyleSheet, Text, TextInput, View} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import useTheme from "@/hooks/useTheme";
 import {useState} from "react";
@@ -11,6 +11,7 @@ type Props = {
     placeholder: string;
     secureTextEntry?: boolean;
     style?: object;
+    keyboardType?: KeyboardTypeOptions;
 };
 
 export default function InputField({
@@ -20,7 +21,8 @@ export default function InputField({
                                        onChangeText,
                                        placeholder,
                                        secureTextEntry,
-                                       style
+                                       style,
+                                       keyboardType
                                    }: Readonly<Props>) {
     const colors = useTheme();
     const [isSecure, setIsSecure] = useState(!!secureTextEntry);
@@ -48,6 +50,7 @@ export default function InputField({
                     value={value}
                     onChangeText={onChangeText}
                     secureTextEntry={isSecure}
+                    keyboardType={keyboardType}
                 />
 
                 {secureTextEntry && (

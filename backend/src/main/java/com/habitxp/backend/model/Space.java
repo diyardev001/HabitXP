@@ -1,10 +1,12 @@
 package com.habitxp.backend.model;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -18,13 +20,13 @@ public class Space {
     private String id;
 
     private String name;
-    private List<String> taskIds;
+    private List<String> habitIds;
 
-    public void addTask(String taskId) {
-        this.taskIds.add(taskId);
+    public void addHabit(String habitId) {
+        this.habitIds.add(habitId);
     }
 
-    public void removeTask(String taskId) {
-        this.taskIds.remove(taskId);
+    public void removeHabit(String habitId) {
+        this.habitIds.remove(habitId);
     }
 } 
