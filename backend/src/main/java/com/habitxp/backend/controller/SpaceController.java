@@ -3,7 +3,9 @@ package com.habitxp.backend.controller;
 import com.habitxp.backend.model.Space;
 import com.habitxp.backend.service.SpaceService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -15,8 +17,9 @@ public class SpaceController {
 
     private final SpaceService spaceService;
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Space>> getSpacesByUser(@PathVariable String userId) {
+    @GetMapping
+    public ResponseEntity<List<Space>> getSpacesByUser(Authentication auth) {
+        String userId = auth.getName();
         return ResponseEntity.ok(spaceService.getSpacesByUser(userId));
     }
 
@@ -28,8 +31,9 @@ public class SpaceController {
     }
 
     @PostMapping
-    public ResponseEntity<Space> createSpace(@RequestBody Space space) {
-        return ResponseEntity.ok(spaceService.createSpace(space));
+    public ResponseEntity<Space> createSpace(@RequestBody Space space, Authentication auth) {
+        space.setUserId(auth.getName());
+        return ResponseEntity.status(HttpStatus.CREATED).body(spaceService.createSpace(space));
     }
 
     @PutMapping
