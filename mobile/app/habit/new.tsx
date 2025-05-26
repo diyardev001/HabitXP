@@ -8,7 +8,7 @@ import InputField from "@/components/InputField";
 import NormalText from "@/components/NormalText";
 import PrimaryButton from "@/components/PrimaryButton";
 import {router} from "expo-router";
-import {createHabit} from "@/services/habitService";
+import {createTask} from "@/services/taskService";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -57,7 +57,7 @@ export default function CreateHabitScreen() {
 
         const habit = {
             title,
-            deadline: null, // TODO: entfernen?
+            deadline: undefined, // TODO: entfernen?
             isCompleted: false,
             rewardXP: 10, // TODO: KI
             rewardCoins: 5, // TODO: KI
@@ -70,7 +70,7 @@ export default function CreateHabitScreen() {
         };
 
         try {
-            await createHabit(habit);
+            await createTask(habit);
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);

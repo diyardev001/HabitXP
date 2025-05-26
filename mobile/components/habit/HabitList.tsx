@@ -1,8 +1,8 @@
 import React, {useEffect, useMemo, useState} from 'react';
 import {FlatList, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import Card from '../habit/Card';
-import {getHabits} from "@/services/habitService";
-import {Habit} from "@/types/habit";
+import {getTasks} from "@/services/taskService";
+import {Task} from "@/types/task";
 
 const isHabitToday = (frequency: string) => {
     if (frequency === 'DAILY') return true;
@@ -29,12 +29,12 @@ const timeToMinutes = (time: string) => {
 };
 
 export default function List() {
-    const [habits, setHabits] = useState<Habit[]>([]);
+    const [habits, setHabits] = useState<Task[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const options = ['Heute', 'Woche', 'Alle'];
 
     useEffect(() => {
-        getHabits()
+        getTasks()
             .then(setHabits)
             .catch((error) => {
                 console.error("Fehler beim Laden der Habits:", error);

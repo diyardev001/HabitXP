@@ -1,9 +1,12 @@
 package com.habitxp.backend.controller;
 
 import com.habitxp.backend.model.Task;
+import com.habitxp.backend.repository.SpaceRepository;
 import com.habitxp.backend.service.TaskService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,9 +17,11 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
+    private final SpaceRepository spaceRepository;
 
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Task>> getTasksByUser(@PathVariable String userId) {
+    @GetMapping
+    public ResponseEntity<List<Task>> getTasks(Authentication auth) {
+        String userId = auth.getName();
         return ResponseEntity.ok(taskService.getTasksByUser(userId));
     }
 
@@ -28,8 +33,16 @@ public class TaskController {
     }
 
     @PostMapping
-    public ResponseEntity<Task> createTask(@RequestBody Task task) {
-        return ResponseEntity.ok(taskService.createTask(task));
+    public ResponseEntity<Task> createTask(@RequestBody Task task, Authentication auth) {
+        task.setUserId(auth.getName());
+        Task savedTask = taskService.createTask(task);
+
+        spaceRepository.findById(task.getSpaceId()).ifPresent(space -> {
+            space.addTask(savedTask.getId());
+            spaceRepository.save(space);
+        });
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 
     @PutMapping
@@ -43,5 +56,5 @@ public class TaskController {
         return ResponseEntity.noContent().build();
     }
 
-    
+
 }
