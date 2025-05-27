@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
+import {ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import {Ionicons} from "@expo/vector-icons";
@@ -9,6 +9,7 @@ import NormalText from "@/components/NormalText";
 import PrimaryButton from "@/components/PrimaryButton";
 import {router} from "expo-router";
 import {createTask} from "@/services/taskService";
+import DropdownSelect from "@/components/DropdownSelect";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -17,7 +18,6 @@ export default function CreateHabitScreen() {
     const [durationValue, setDurationValue] = useState("15");
     const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
-    const [showUnitDropdown, setShowUnitDropdown] = useState(false);
 
     const colors = useTheme();
 
@@ -106,7 +106,7 @@ export default function CreateHabitScreen() {
                             key={opt.value}
                             style={[
                                 styles.optionButton,
-                                {backgroundColor: frequency === opt.value ? colors.primary : colors.input},
+                                {backgroundColor: frequency === opt.value ? colors.primary : colors.inputBackground},
                             ]}
                             onPress={() => setFrequency(opt.value)}
                         >
@@ -117,7 +117,7 @@ export default function CreateHabitScreen() {
 
                 <View style={styles.timeRow}>
                     {frequency !== "NONE" && (
-                        <View style={styles.timeCol}>
+                        <View>
                             <NormalText style={styles.label}>Wie oft
                                 pro {frequencyLabels[frequency]}?</NormalText>
                             <InputField
@@ -125,11 +125,12 @@ export default function CreateHabitScreen() {
                                 onChangeText={setTimes}
                                 placeholder={"1"}
                                 keyboardType={"numeric"}
+                                style={styles.input}
                             />
                         </View>
                     )}
 
-                    <View style={styles.timeCol}>
+                    <View>
                         <NormalText style={styles.label}>Wie lange?</NormalText>
                         <View style={styles.durationRow}>
                             <InputField
@@ -137,46 +138,17 @@ export default function CreateHabitScreen() {
                                 onChangeText={setDurationValue}
                                 placeholder={"15"}
                                 keyboardType={"numeric"}
-                                style={[
-                                    frequency === "NONE"
-                                        ? {width: 80, marginRight: 8}
-                                        : {flex: 1, marginRight: 8}
-                                ]}
+                                style={[styles.input, {marginRight: 8}]}
                             />
-                            <TouchableOpacity
-                                style={[styles.unitSelector, {backgroundColor: colors.input}]}
-                                onPress={() => setShowUnitDropdown(true)}
-                            >
-                                <NormalText style={styles.unitLabel}>
-                                    {durationOptions.find(opt => opt.value === durationUnit)?.label}
-                                </NormalText>
-                            </TouchableOpacity>
+                            <DropdownSelect
+                                value={durationUnit}
+                                data={durationOptions}
+                                onChange={(item) => setDurationUnit(item.value as "MINUTES" | "HOURS")}
+                                style={styles.unitDropdown}
+                            />
                         </View>
-                    </View>
 
-                    <Modal
-                        visible={showUnitDropdown}
-                        transparent
-                        animationType="fade"
-                        onRequestClose={() => setShowUnitDropdown(false)}
-                    >
-                        <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowUnitDropdown(false)}>
-                            <View style={styles.modalContent}>
-                                {durationOptions.map((opt) => (
-                                    <Pressable
-                                        key={opt.value}
-                                        onPress={() => {
-                                            setDurationUnit(opt.value as "MINUTES" | "HOURS");
-                                            setShowUnitDropdown(false);
-                                        }}
-                                        style={styles.modalItem}
-                                    >
-                                        <NormalText>{opt.label}</NormalText>
-                                    </Pressable>
-                                ))}
-                            </View>
-                        </TouchableOpacity>
-                    </Modal>
+                    </View>
                 </View>
 
                 <PrimaryButton title={"Speichern"} onPress={handleCreateHabit}/>
@@ -219,27 +191,20 @@ const styles = StyleSheet.create({
     },
     timeRow: {
         flexDirection: "row",
+        justifyContent: "space-between",
         gap: 12,
         marginBottom: 16
     },
-    timeCol: {
-        flex: 1
+    input: {
+        width: 100
     },
     durationRow: {
         flexDirection: "row",
         alignItems: "center"
     },
-    unitSelector: {
-        paddingVertical: 10,
-        paddingHorizontal: 14,
-        borderRadius: 8,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 14
-    },
-    unitLabel: {
-        fontWeight: "600",
-        width: 60,
+    unitDropdown: {
+        width: 110,
+        marginBottom: 14,
     },
     optionButton: {
         paddingHorizontal: 14,
