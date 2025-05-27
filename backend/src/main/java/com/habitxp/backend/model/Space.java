@@ -21,6 +21,7 @@ public class Space {
     private String userId;
 
     private String name;
+    private String color;
 
     private List<String> taskIds;
 
