@@ -1,10 +1,8 @@
 export type Task = {
     id?: string;
     title: string;
-    deadline?: {
-        time: string;
-        duration?: string;
-    } | null;
+    duration: string;
+    times: number;
     frequency: string;
     isCompleted: boolean;
     color: string;

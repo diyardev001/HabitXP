@@ -4,34 +4,25 @@ import Card from '../habit/Card';
 import {getTasks} from "@/services/taskService";
 import {Task} from "@/types/task";
 
-const isHabitToday = (frequency: string) => {
-    if (frequency === 'DAILY') return true;
+const durationToMinutes = (duration: string): number => {
+    const match = duration?.match(/^(\d+)(min|h)$/);
+    const value = parseInt(match?.[1] ?? "0");
+    const unit = match?.[2];
 
-    const daysMap: { [key: string]: number } = {
-        Mo: 1,
-        Di: 2,
-        Mi: 3,
-        Do: 4,
-        Fr: 5,
-        Sa: 6,
-        So: 0,
-    };
-
-    const today = new Date().getDay();
-    const habitDays = frequency.split(', ');
-
-    return habitDays.some(day => daysMap[day] === today);
+    if (isNaN(value)) return 0;
+    return unit === "h" ? value * 60 : value;
 };
 
-const timeToMinutes = (time: string) => {
-    const [hours, minutes] = time.split(':').map(Number);
-    return hours * 60 + minutes;
+const frequencyFilters: { [key: number]: (task: Task) => boolean } = {
+    0: (task: Task) => task.frequency === 'DAILY',
+    1: (task: Task) => task.frequency === 'WEEKLY',
+    2: (task: Task) => task.frequency === 'MONTHLY' || task.frequency === 'NONE',
 };
 
 export default function List() {
     const [habits, setHabits] = useState<Task[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const options = ['Heute', 'Woche', 'Alle'];
+    const options = ['Heute', 'Woche', 'Alle']; // TODO add Monat
 
     useEffect(() => {
         getTasks()
@@ -42,24 +33,12 @@ export default function List() {
     }, []);
 
     const filteredData = useMemo(() => {
-        let filtered = [...habits];
+        const sortedTasks = [...habits].sort(
+            (a, b) => durationToMinutes(a.duration) - durationToMinutes(b.duration)
+        );
 
-        filtered.sort((a, b) => {
-            const aTime = a.deadline?.time || "00:00";
-            const bTime = b.deadline?.time || "00:00";
-            return timeToMinutes(aTime) - timeToMinutes(bTime);
-        });
-
-        switch (selectedIndex) {
-            case 0:
-                return filtered.filter(
-                    item => item.frequency === 'DAILY' || isHabitToday(item.frequency),
-                );
-            case 1:
-                return filtered.filter(item => item.frequency !== 'DAILY');
-            default:
-                return filtered;
-        }
+        const filterByFrequency = frequencyFilters[selectedIndex];
+        return filterByFrequency ? sortedTasks.filter(filterByFrequency) : sortedTasks;
     }, [selectedIndex, habits]);
 
     return (
@@ -89,19 +68,25 @@ export default function List() {
             <FlatList
                 data={filteredData}
                 keyExtractor={(item, index) => index.toString()}
-                renderItem={({item}) => (
-                    <Card
-                        title={item.title}
-                        deadline={{
-                            time: item.deadline?.time ?? "00:00",
-                            duration: item.deadline?.duration ?? "0",
-                        }} // TODO
-                        frequency={item.frequency}
-                        done={item.isCompleted}
-                        bgcolor={item.color}
-                        accent={item.accent ?? "#999"} // TODO
-                    />
-                )}
+                renderItem={({item}) => {
+                    const match = item.duration?.match(/^(\d+)(min|h)$/);
+                    const durationValue = match?.[1] || "0";
+                    const durationUnit = match?.[2] === "h" ? "HOURS" : "MINUTES";
+
+                    return (
+                        <Card
+                            title={item.title}
+                            durationValue={durationValue}
+                            durationUnit={durationUnit}
+                            times={item.times}
+                            frequency={item.frequency}
+                            done={item.isCompleted}
+                            bgcolor={item.color}
+                            accent={item.accent ?? "#999"}
+                        />
+                    );
+                }}
+
             />
         </View>
     );

@@ -14,11 +14,9 @@ export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
     const [frequency, setFrequency] = useState("DAILY");
     const [times, setTimes] = useState("1");
-    const [duration, setDuration] = useState("15min");
-    const [customFreqUnit, setCustomFreqUnit] = useState("DAYS");
-    const [customFreqValue, setCustomFreqValue] = useState("3");
+    const [durationValue, setDurationValue] = useState("15");
+    const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
-    const [color, setColor] = useState("#a78bfa");
     const [showUnitDropdown, setShowUnitDropdown] = useState(false);
 
     const colors = useTheme();
@@ -27,26 +25,23 @@ export default function CreateHabitScreen() {
         {label: "Täglich", value: "DAILY"},
         {label: "Wöchentlich", value: "WEEKLY"},
         {label: "Monatlich", value: "MONTHLY"},
-        {label: "Halbjährlich", value: "SEMESTERLY"},
-        {label: "Jährlich", value: "YEARLY"},
-        {label: "Benutzerdefiniert", value: "CUSTOM"},
+        {label: "Keine", value: "NONE"},
     ];
 
     const frequencyLabels: Record<string, string> = {
         DAILY: "Tag",
         WEEKLY: "Woche",
-        MONTHLY: "Monat",
-        SEMESTERLY: "Halbjahr",
-        YEARLY: "Jahr",
-        CUSTOM: "Zeitraum",
+        MONTHLY: "Monat"
     };
 
-    const colorOptions = ["#a78bfa", "#f472b6", "#60a5fa", "#34d399", "#fcd34d"];
+    const getDurationLabel = (unit: "MINUTES" | "HOURS", value: string) =>
+        unit === "HOURS"
+            ? value === "1" ? "Stunde" : "Stunden"
+            : value === "1" ? "Minute" : "Minuten";
 
-    const customFreqUnitOptions = [
-        {label: "Tage", value: "DAYS"},
-        {label: "Wochen", value: "WEEKS"},
-        {label: "Monate", value: "MONTHS"},
+    const durationOptions = [
+        {label: getDurationLabel("MINUTES", durationValue), value: "MINUTES"},
+        {label: getDurationLabel("HOURS", durationValue), value: "HOURS"},
     ];
 
     const handleCreateHabit = async () => {
@@ -55,18 +50,17 @@ export default function CreateHabitScreen() {
             return;
         }
 
+        //const spaceData = await getSpaceById(space);
         const habit = {
             title,
-            deadline: undefined, // TODO: entfernen?
+            duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             isCompleted: false,
             rewardXP: 10, // TODO: KI
             rewardCoins: 5, // TODO: KI
             frequency,
-            times: frequency !== "CUSTOM" ? parseInt(times) : null,
-            duration: frequency !== "CUSTOM" ? duration : null,
-            custom: frequency === "CUSTOM" ? {unit: customFreqUnit, value: customFreqValue} : null,
+            times: frequency !== "NONE" ? parseInt(times) : 0,
             spaceId: space,
-            color,
+            color: "#a78bfa",//spaceData.color, TODO Space Color
         };
 
         try {
@@ -74,7 +68,7 @@ export default function CreateHabitScreen() {
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);
-            alert("Fehler beim Erstellen der Gewohnheit");
+            alert("Fehler beim Erstellen des Habits");
         }
 
         console.log("Habit wird erstellt:", habit);
@@ -85,6 +79,7 @@ export default function CreateHabitScreen() {
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                 <Ionicons name={"arrow-back"} size={24} color={colors.title}/>
             </TouchableOpacity>
+
             <ScrollView contentContainerStyle={styles.scroll}>
                 <View style={styles.header}>
                     <Ionicons name={"calendar"} size={24} color={colors.primary} style={styles.headerIcon}/>
@@ -104,7 +99,7 @@ export default function CreateHabitScreen() {
                     placeholder={"z.B. Gesundheit"}
                 />
 
-                <NormalText style={styles.label}>Frequenz</NormalText>
+                <NormalText style={styles.label}>Zeitintervall</NormalText>
                 <View style={styles.row}>
                     {frequencyOptions.map((opt) => (
                         <TouchableOpacity
@@ -120,85 +115,68 @@ export default function CreateHabitScreen() {
                     ))}
                 </View>
 
-                {frequency !== "CUSTOM" && (
-                    <View style={styles.row}>
-                        <View style={{flex: 1}}>
+                <View style={styles.timeRow}>
+                    {frequency !== "NONE" && (
+                        <View style={styles.timeCol}>
                             <NormalText style={styles.label}>Wie oft
-                                pro {frequencyLabels[frequency] ?? "Zeitraum"}?</NormalText>
+                                pro {frequencyLabels[frequency]}?</NormalText>
                             <InputField
                                 value={times}
                                 onChangeText={setTimes}
-                                placeholder={"3"}
+                                placeholder={"1"}
                                 keyboardType={"numeric"}
                             />
                         </View>
+                    )}
 
-                        <View style={{flex: 1}}>
-                            <NormalText style={styles.label}>Wie lange?</NormalText>
+                    <View style={styles.timeCol}>
+                        <NormalText style={styles.label}>Wie lange?</NormalText>
+                        <View style={styles.durationRow}>
                             <InputField
-                                value={duration}
-                                onChangeText={setDuration}
-                                placeholder={"30 min."}
-                            />
-                        </View>
-                    </View>
-                )}
-
-                {frequency === "CUSTOM" && (
-                    <>
-                        <NormalText style={styles.label}>Benutzerdefiniert</NormalText>
-                        <View style={styles.row}>
-                            <InputField
-                                value={customFreqValue}
-                                onChangeText={setCustomFreqValue}
-                                placeholder="3"
-                                keyboardType="numeric"
-                                style={{flex: 1}}
+                                value={durationValue}
+                                onChangeText={setDurationValue}
+                                placeholder={"15"}
+                                keyboardType={"numeric"}
+                                style={[
+                                    frequency === "NONE"
+                                        ? {width: 80, marginRight: 8}
+                                        : {flex: 1, marginRight: 8}
+                                ]}
                             />
                             <TouchableOpacity
-                                style={[styles.optionButton, {flex: 1}]}
+                                style={[styles.unitSelector, {backgroundColor: colors.input}]}
                                 onPress={() => setShowUnitDropdown(true)}
                             >
-                                <NormalText>
-                                    {customFreqUnitOptions.find((u) => u.value === customFreqUnit)?.label || "Einheit"}
+                                <NormalText style={styles.unitLabel}>
+                                    {durationOptions.find(opt => opt.value === durationUnit)?.label}
                                 </NormalText>
                             </TouchableOpacity>
                         </View>
+                    </View>
 
-                        <Modal
-                            visible={showUnitDropdown}
-                            transparent
-                            animationType="fade"
-                            onRequestClose={() => setShowUnitDropdown(false)}
-                        >
-                            <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowUnitDropdown(false)}>
-                                <View style={styles.modalContent}>
-                                    {customFreqUnitOptions.map((opt) => (
-                                        <Pressable
-                                            key={opt.value}
-                                            onPress={() => {
-                                                setCustomFreqUnit(opt.value);
-                                                setShowUnitDropdown(false);
-                                            }}
-                                            style={styles.modalItem}
-                                        >
-                                            <NormalText>{opt.label}</NormalText>
-                                        </Pressable>
-                                    ))}
-                                </View>
-                            </TouchableOpacity>
-                        </Modal>
-                    </>
-                )}
-
-                <View style={styles.row}>
-                    {colorOptions.map((c) => (
-                        <TouchableOpacity
-                            key={c}
-                            style={[styles.colorCircle, {backgroundColor: c, borderWidth: color === c ? 2 : 0}]}
-                            onPress={() => setColor(c)}
-                        />
-                    ))}
+                    <Modal
+                        visible={showUnitDropdown}
+                        transparent
+                        animationType="fade"
+                        onRequestClose={() => setShowUnitDropdown(false)}
+                    >
+                        <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowUnitDropdown(false)}>
+                            <View style={styles.modalContent}>
+                                {durationOptions.map((opt) => (
+                                    <Pressable
+                                        key={opt.value}
+                                        onPress={() => {
+                                            setDurationUnit(opt.value as "MINUTES" | "HOURS");
+                                            setShowUnitDropdown(false);
+                                        }}
+                                        style={styles.modalItem}
+                                    >
+                                        <NormalText>{opt.label}</NormalText>
+                                    </Pressable>
+                                ))}
+                            </View>
+                        </TouchableOpacity>
+                    </Modal>
                 </View>
 
                 <PrimaryButton title={"Speichern"} onPress={handleCreateHabit}/>
@@ -239,16 +217,34 @@ const styles = StyleSheet.create({
         gap: 10,
         alignItems: "center"
     },
+    timeRow: {
+        flexDirection: "row",
+        gap: 12,
+        marginBottom: 16
+    },
+    timeCol: {
+        flex: 1
+    },
+    durationRow: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    unitSelector: {
+        paddingVertical: 10,
+        paddingHorizontal: 14,
+        borderRadius: 8,
+        justifyContent: "center",
+        alignItems: "center",
+        marginBottom: 14
+    },
+    unitLabel: {
+        fontWeight: "600",
+        width: 60,
+    },
     optionButton: {
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 8
-    },
-    colorCircle: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        marginRight: 10,
     },
     modalOverlay: {
         flex: 1,
