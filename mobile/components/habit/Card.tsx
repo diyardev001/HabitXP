@@ -3,19 +3,26 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 
 interface CardProps {
     title: string;
-    deadline: {
-        duration: string;
-        time: string;
-    };
+    durationValue: string;
+    durationUnit: "MINUTES" | "HOURS"
+    times: number;
     frequency: string;
     done: boolean;
     bgcolor: string;
     accent: string;
 }
 
+const frequencyMap: Record<string, string> = {
+    DAILY: "Täglich",
+    WEEKLY: "Wöchentlich",
+    MONTHLY: "Monatlich",
+};
+
 export default function Card({
                                  title,
-                                 deadline,
+                                 durationValue,
+                                 durationUnit,
+                                 times,
                                  frequency,
                                  done,
                                  bgcolor,
@@ -80,7 +87,10 @@ export default function Card({
                 <View style={styles.top}>
                     {/* Badge */}
                     <View style={styles.timeBadge}>
-                        <Text style={styles.duration}>{deadline.duration} MIN</Text>
+                        <Text style={styles.duration}>{durationValue} {durationUnit === "HOURS"
+                            ? (durationValue === "1" ? "Stunde" : "Stunden")
+                            : (durationValue === "1" ? "Minute" : "Minuten")}
+                        </Text>
                     </View>
                     <TouchableOpacity style={styles.editButton}>
                         <Ionicons name="ellipsis-vertical" size={16} color="white"/>
@@ -104,8 +114,9 @@ export default function Card({
                 }}
             >
                 <Text style={styles.deadline}>
-                    {frequency}: {deadline.time}
+                    {frequency !== "NONE" ? `${times}-mal ${frequencyMap[frequency]}` : ""}
                 </Text>
+
                 <TouchableOpacity>
                     <Image
                         source={require('@/assets/images/icons/home/check.png')}
