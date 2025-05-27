@@ -13,9 +13,9 @@ interface CardProps {
 }
 
 const frequencyMap: Record<string, string> = {
-    DAILY: "Täglich",
-    WEEKLY: "Wöchentlich",
-    MONTHLY: "Monatlich",
+    DAILY: "täglich",
+    WEEKLY: "wöchentlich",
+    MONTHLY: "monatlich",
 };
 
 export default function Card({
@@ -114,7 +114,7 @@ export default function Card({
                 }}
             >
                 <Text style={styles.deadline}>
-                    {frequency !== "NONE" ? `${times}-mal ${frequencyMap[frequency]}` : ""}
+                    {frequency !== "NONE" ? `${times}x ${frequencyMap[frequency]}` : ""}
                 </Text>
 
                 <TouchableOpacity>

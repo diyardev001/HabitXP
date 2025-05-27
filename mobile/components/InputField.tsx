@@ -36,7 +36,7 @@ export default function InputField({
 
             <View style={[
                 styles.inputWrapper,
-                {backgroundColor: colors.input, paddingLeft: icon ? 10 : 14}
+                {backgroundColor: colors.inputBackground, paddingLeft: icon ? 10 : 14}
             ]}>
                 {/* Icon nur anzeigen, wenn vorhanden */}
                 {icon && (
@@ -46,7 +46,7 @@ export default function InputField({
                 <TextInput
                     placeholder={placeholder}
                     placeholderTextColor="#999"
-                    style={[styles.input, {color: colors.title}]}
+                    style={[styles.input, {color: colors.inputText}]}
                     value={value}
                     onChangeText={onChangeText}
                     secureTextEntry={isSecure}
