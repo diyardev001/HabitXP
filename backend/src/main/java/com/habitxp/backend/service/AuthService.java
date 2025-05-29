@@ -7,8 +7,12 @@ import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.UserRepository;
 import com.habitxp.backend.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
 
 @Service
 @RequiredArgsConstructor
@@ -18,36 +22,72 @@ public class AuthService {
     private final BCryptPasswordEncoder passwordEncoder;
     private final JwtService jwtService;
 
+    private boolean isPasswordSecure(String password) {
+        // Mindestens 8 Zeichen und einen Großbuchstaben
+        String regex = "^(?=.*[A-Z]).{8,}$";
+        return password.matches(regex);
+    }
+
     public AuthResponse register(RegisterRequest request) {
-        if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already in use");
+        if (!isPasswordSecure(request.getPassword())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Password must be at least 8 characters long and contain at least one uppercase letter.");
         }
+        if (userRepository.existsByEmail(request.getEmail())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Email already in use");
+        }
+        if (userRepository.existsByUsername(request.getUsername())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already in use");
+        }
+
+        String accessToken = jwtService.generateAccessToken(request.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(request.getEmail());
 
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
+                .firstName(request.getFirstName())
+                .lastName(request.getLastName())
                 .xp(0)
-                .xpGoal(100) // Todo
+                .xpGoal(100)
                 .coins(0)
                 .level(1)
+                .health(100) // z. B. Standardwert
+                .currentXP(0)
+                .spaceIds(new ArrayList<>())
+                .bonusIds(new ArrayList<>())
+                .refreshToken(refreshToken)
                 .build();
+
 
         userRepository.save(user);
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token);
+        return new AuthResponse(accessToken, refreshToken);
     }
 
     public AuthResponse login(LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "User not found"));
 
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        String token = jwtService.generateToken(user.getEmail());
-        return new AuthResponse(token);
+        String accessToken = jwtService.generateAccessToken(user.getEmail());
+        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+
+        user.setRefreshToken(refreshToken);
+        userRepository.save(user);
+
+        return new AuthResponse(accessToken, refreshToken);
+    }
+
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+    }
+
+    public void saveUser(User user) {
+        userRepository.save(user);
     }
 }
