@@ -21,6 +21,11 @@ public class BonusController {
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+    @GetMapping
+    public ResponseEntity<List<Bonus>> getAllBonuses() {
+        return ResponseEntity.ok(bonusService.getAllBonuses());
+    }
+
 
     @PostMapping
     public ResponseEntity<Bonus> createBonus(@RequestBody Bonus bonus) {

@@ -43,6 +43,11 @@ public class Task {
         user.setCoins(user.getCoins() + rewardCoins);
         user.xpFactorReset();
         user.setXp(user.getXp() + rewardXP * user.getXpFactor());
+        user.setCoins(user.getCoins() + rewardCoins);
+        user.calculateCurrentXP();
+        user.calculateLevel();
+        user.calculateXPGoal();
+
     }
 
     public boolean streakAlive() {
