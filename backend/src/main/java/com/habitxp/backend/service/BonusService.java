@@ -18,6 +18,11 @@ public class BonusService {
         return bonusRepository.findById(id);
     }
 
+    public List<Bonus> getAllBonuses() {
+        return bonusRepository.findAll();
+    }
+
+
     public Bonus createBonus(Bonus bonus) {
         return bonusRepository.save(bonus);
     }

@@ -1,0 +1,78 @@
+package com.habitxp.backend.service;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
+
+import com.habitxp.backend.model.Task;
+
+import java.util.*;
+
+@Service
+public class AIAgentService {
+
+    private final RestTemplate restTemplate = new RestTemplate();
+
+    @Value("${openai.api.key}")
+    private String apiKey;
+
+    public int calculateXP(Task task) {
+        String prompt = buildPrompt(task, "xp");
+        return askOpenAI(prompt);
+    }
+
+    public int calculateCoins(Task task) {
+        String prompt = buildPrompt(task, "coins");
+        return askOpenAI(prompt);
+    }
+
+    private int askOpenAI(String prompt) {
+        String url = "https://api.openai.com/v1/chat/completions";
+
+        Map<String, Object> message = Map.of(
+                "role", "user",
+                "content", prompt
+        );
+
+        Map<String, Object> requestBody = Map.of(
+                "model", "gpt-3.5-turbo",
+                "messages", List.of(message),
+                "temperature", 0.5
+        );
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        headers.setBearerAuth(apiKey);
+
+        HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.POST, entity, Map.class);
+
+        Map<String, Object> choice = ((List<Map<String, Object>>) response.getBody().get("choices")).get(0);
+        Map<String, String> messageResp = (Map<String, String>) choice.get("message");
+        String content = messageResp.get("content").replaceAll("[^0-9]", "");
+
+        return Integer.parseInt(content.trim());
+    }
+
+    private String buildPrompt(Task task, String type) {
+        return String.format("""
+            Du bist ein intelligenter Belohnungsagent in einer Gamification-App.
+            Berechne die %s-Belohnung für die folgende Aufgabe:
+
+            Titel: %s
+            Dauer: %s
+            Wiederholungen: %s
+            Streak: %d
+
+            Gib nur eine ganze Zahl zwischen 1 und 100 als Antwort zurück.
+            """,
+            type,
+            task.getTitle(),
+            task.getDuration(),
+            task.getTimes() != null ? task.getTimes() : "unbekannt",
+            task.getStreak()
+        );
+    }
+}

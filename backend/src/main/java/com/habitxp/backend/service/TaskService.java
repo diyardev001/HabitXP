@@ -13,6 +13,7 @@ import java.util.Optional;
 public class TaskService {
 
     private final TaskRepository taskRepository;
+    private final AIAgentService aiagent;
 
     public List<Task> getTasksByUser(String userId) {
         return taskRepository.findByUserId(userId);
@@ -23,6 +24,8 @@ public class TaskService {
     }
 
     public Task createTask(Task task) {
+        task.setRewardXP(aiagent.calculateXP(task));
+        task.setRewardCoins(aiagent.calculateCoins(task));
         return taskRepository.save(task);
     }
 

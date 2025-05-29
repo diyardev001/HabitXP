@@ -30,13 +30,12 @@ public class User {
     private int health;
     private int coins;
 
-    private int level;
-    private int xp;
-
     @Builder.Default
     private int xpFactor = 1;
     private Instant xpFactorUntil;
 
+    private int level;
+    private int xp;
     private int currentXP;
     private int xpGoal;
 
@@ -51,7 +50,6 @@ public class User {
         this.spaceIds.remove(spaceId);
     }
 
-    // Levelmanagement
     public void calculateLevel() {
         int tempLevel = 0;
         double xpSum = 0;
@@ -63,7 +61,6 @@ public class User {
     }
 
     public void calculateCurrentXP() {
-        // Aktuelles XP innerhalb des Levels
         double xpSum = 0;
         for (int i = 0; i < level; i++) {
             xpSum += Math.round(100 * Math.pow(1.2, i));
@@ -72,7 +69,6 @@ public class User {
     }
 
     public void calculateXPGoal() {
-        // Ziel-XP fürs nächste Level
         this.xpGoal = (int) Math.round(100 * Math.pow(1.2, level));
     }
 
@@ -80,13 +76,6 @@ public class User {
         if (xpFactorUntil != null && Instant.now().isAfter(xpFactorUntil)) {
             xpFactor = 1;
             xpFactorUntil = null;
-        }
-    }
-
-    public void purchaseBonus(String bonusId, int price) {
-        if (this.coins >= price) {
-            this.coins -= price;
-            this.bonusIds.add(bonusId);
         }
     }
 
