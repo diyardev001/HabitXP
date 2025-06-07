@@ -10,6 +10,7 @@ import PrimaryButton from "@/components/PrimaryButton";
 import {router} from "expo-router";
 import {createTask} from "@/services/taskService";
 import DropdownSelect from "@/components/DropdownSelect";
+import {Colors} from "@/constants/Colors";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -18,8 +19,12 @@ export default function CreateHabitScreen() {
     const [durationValue, setDurationValue] = useState("15");
     const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
+    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit | null>(null);
+    const selectedColor = selectedColorKey ? Colors.habit[selectedColorKey] : null;
+
 
     const colors = useTheme();
+    const colorOptions = Object.entries(Colors.habit);
 
     const frequencyOptions = [
         {label: "Täglich", value: "DAILY"},
@@ -49,6 +54,10 @@ export default function CreateHabitScreen() {
             alert("Bitte Titel und Space ausfüllen");
             return;
         }
+        if (!selectedColor) {
+            alert("Bitte eine Farbe auswählen");
+            return;
+        }
 
         //const spaceData = await getSpaceById(space);
         const habit = {
@@ -60,7 +69,9 @@ export default function CreateHabitScreen() {
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
             spaceId: space,
-            color: "#a78bfa",//spaceData.color, TODO Space Color
+            color: selectedColor.bg,
+            accent: selectedColor.ac,
+            colorCompleted: selectedColor.completed,
         };
 
         try {
@@ -150,6 +161,22 @@ export default function CreateHabitScreen() {
 
                     </View>
                 </View>
+                <View style={styles.row}>
+                    {colorOptions.map(([key, colorSet]) => (
+                        <TouchableOpacity
+                            key={key}
+                            style={[
+                                styles.colorCircle,
+                                {
+                                    backgroundColor: colorSet.bg,
+                                    borderWidth: selectedColorKey === key ? 3 : 0,
+                                    borderColor: 'white',
+                                },
+                            ]}
+                            onPress={() => setSelectedColorKey(key as keyof typeof Colors.habit)}
+                        />
+                    ))}
+                </View>
 
                 <PrimaryButton title={"Speichern"} onPress={handleCreateHabit}/>
             </ScrollView>
@@ -226,4 +253,10 @@ const styles = StyleSheet.create({
     modalItem: {
         paddingVertical: 10,
     },
+    colorCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        margin: 8,
+    }
 })
