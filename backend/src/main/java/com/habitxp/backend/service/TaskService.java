@@ -1,6 +1,9 @@
 package com.habitxp.backend.service;
 
+import com.habitxp.backend.dto.CompletionResponse;
+import com.habitxp.backend.dto.StatusResponse;
 import com.habitxp.backend.model.Task;
+import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.TaskRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -35,5 +38,25 @@ public class TaskService {
 
     public void deleteTask(String id) {
         taskRepository.deleteById(id);
+    }
+
+    public CompletionResponse completeTask(Task task, User user) {
+        boolean success = task.markAsCompleted(user);
+        taskRepository.save(task);
+
+        return new CompletionResponse(
+                success,
+                task.isCompleted(),
+                task.remainingCompletions()
+        );
+    }
+
+    public StatusResponse getTaskStatus(Task task) {
+        return new StatusResponse(
+                task.isCompleted(),
+                task.remainingCompletions(),
+                task.getColor(),
+                task.getColorCompleted()
+        );
     }
 }
