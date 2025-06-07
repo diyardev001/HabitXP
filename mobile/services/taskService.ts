@@ -1,7 +1,7 @@
 import api from "@/services/api";
-import {Task} from "@/types/task";
+import {NewTask, Task} from "@/types/task";
 
-export const createTask = async (task: Task) => {
+export const createTask = async (task: NewTask) => {
     try {
         const res = await api.post("/tasks", task);
         return res.data;
@@ -11,13 +11,9 @@ export const createTask = async (task: Task) => {
     }
 };
 
-export const getTasks = async () => {
-    try {
-        const res = await api.get("/tasks");
-        return res.data;
-    } catch (err) {
-        console.error("Fehler beim Abrufen aller Tasks:", err);
-    }
+export const getTasks = async (): Promise<Task[]> => {
+    const res = await api.get("/tasks");
+    return res.data;
 };
 
 export const getTasksByUser = async (userId: string) => {
@@ -52,5 +48,25 @@ export const deleteTask = async (id: string) => {
         await api.delete(`/tasks/${id}`);
     } catch (err) {
         console.error(`Fehler beim Löschen des Tasks mit ID ${id}:`, err);
+    }
+};
+
+export const completeTask = async (id: string) => {
+    try {
+        const res = await api.post(`/tasks/${id}/complete`);
+        return res.data;
+    } catch (err) {
+        console.error(`Fehler beim Abschließen des Tasks mit ID ${id}:`, err);
+        throw err;
+    }
+};
+
+export const getTaskStatus = async (id: string) => {
+    try {
+        const res = await api.get(`/tasks/${id}/status`);
+        return res.data;
+    } catch (err) {
+        console.error(`Fehler beim Laden des Status für Task mit ID ${id}:`, err);
+        throw err;
     }
 };
