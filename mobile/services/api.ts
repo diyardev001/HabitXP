@@ -4,12 +4,28 @@ import * as SecureStore from "expo-secure-store";
 import {router} from "expo-router";
 import {ROUTES} from "@/routes";
 
+let currentAccessToken: string | null = null;
+
+export const setAccessToken = (token: string | null) => {
+    currentAccessToken = token;
+};
+
 const api = axios.create({
     baseURL: Constants.expoConfig?.extra?.API_URL,
     headers: {
         "Content-Type": "application/json",
     },
 });
+
+api.interceptors.request.use(
+    (config) => {
+        if (currentAccessToken) {
+            config.headers.Authorization = `Bearer ${currentAccessToken}`;
+        }
+        return config;
+    },
+    error => Promise.reject(error)
+);
 
 api.interceptors.response.use(
     response => response,
@@ -32,10 +48,12 @@ api.interceptors.response.use(
 
                 const {accessToken, refreshToken: newRefreshToken} = res.data;
 
-                await SecureStore.setItemAsync("accessToken", accessToken);
-                await SecureStore.setItemAsync("refreshToken", newRefreshToken);
+                await Promise.all([
+                    SecureStore.setItemAsync("accessToken", accessToken),
+                    SecureStore.setItemAsync("refreshToken", newRefreshToken),
+                ]);
 
-                api.defaults.headers.common["Authorization"] = `Bearer ${accessToken}`;
+                setAccessToken(accessToken);
                 originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
 
                 return api(originalRequest);
@@ -44,6 +62,7 @@ api.interceptors.response.use(
 
                 await SecureStore.deleteItemAsync("accessToken");
                 await SecureStore.deleteItemAsync("refreshToken");
+
                 router.replace(ROUTES.LOGIN);
 
                 const error = refreshError instanceof Error
@@ -58,17 +77,6 @@ api.interceptors.response.use(
             error instanceof Error ? error : new Error("Unbekannter API-Fehler")
         );
     }
-)
-
-api.interceptors.request.use(
-    async (config) => {
-        const token = await SecureStore.getItemAsync("accessToken");
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
-        return config;
-    },
-    error => Promise.reject(error)
 );
 
 export default api;
