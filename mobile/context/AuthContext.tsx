@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 import * as SecureStore from 'expo-secure-store';
 import {router, useSegments} from "expo-router";
-import api from "@/services/api";
+import api, {setAccessToken} from "@/services/api";
 import {AuthContextType, RegisterRequest, User} from "@/types/auth";
 import {ROUTES} from "@/routes";
 

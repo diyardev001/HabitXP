@@ -1,5 +1,5 @@
 export type Task = {
-    id?: string;
+    id: string;
     title: string;
     duration: string;
     times: number;
@@ -7,4 +7,7 @@ export type Task = {
     isCompleted: boolean;
     color: string;
     accent?: string;
+    colorCompleted: string;
 }
+
+export type NewTask = Omit<Task, 'id'>;

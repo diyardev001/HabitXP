@@ -61,6 +61,7 @@ export default function CreateHabitScreen() {
             times: frequency !== "NONE" ? parseInt(times) : 0,
             spaceId: space,
             color: "#a78bfa",//spaceData.color, TODO Space Color
+            colorCompleted: "#a78fff"
         };
 
         try {

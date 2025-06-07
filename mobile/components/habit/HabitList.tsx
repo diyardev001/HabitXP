@@ -75,6 +75,7 @@ export default function List() {
 
                     return (
                         <Card
+                            id={item.id}
                             title={item.title}
                             durationValue={durationValue}
                             durationUnit={durationUnit}
@@ -83,6 +84,7 @@ export default function List() {
                             done={item.isCompleted}
                             bgcolor={item.color}
                             accent={item.accent ?? "#999"}
+                            colorCompleted={item.colorCompleted}
                         />
                     );
                 }}
