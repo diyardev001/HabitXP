@@ -47,7 +47,8 @@ public class TaskService {
         return new CompletionResponse(
                 success,
                 task.isCompleted(),
-                task.remainingCompletions()
+                task.remainingCompletions(),
+                task.getColorCompleted()
         );
     }
 

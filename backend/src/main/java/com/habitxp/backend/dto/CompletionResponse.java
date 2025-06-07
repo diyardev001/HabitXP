@@ -9,4 +9,5 @@ public class CompletionResponse {
     private boolean success;
     private boolean isCompleted;
     private int remaining;
+    private String colorCompleted;
 }

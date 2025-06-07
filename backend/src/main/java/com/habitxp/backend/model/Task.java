@@ -44,6 +44,7 @@ public class Task {
 
     private String spaceId;
     private String color;
+    private String accent;
     private String colorCompleted;
 
     @Builder.Default

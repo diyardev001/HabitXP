@@ -67,7 +67,7 @@ export default function List() {
 
             <FlatList
                 data={filteredData}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={({item}) => {
                     const match = item.duration?.match(/^(\d+)(min|h)$/);
                     const durationValue = match?.[1] || "0";

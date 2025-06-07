@@ -6,7 +6,7 @@ export type Task = {
     frequency: string;
     isCompleted: boolean;
     color: string;
-    accent?: string;
+    accent: string;
     colorCompleted: string;
 }
 
