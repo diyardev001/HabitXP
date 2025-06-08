@@ -30,9 +30,13 @@ public class User {
     private int health;
     private int coins;
 
+    private int streak;
+    private boolean streakBroken;
+
     @Builder.Default
     private int xpFactor = 1;
     private Instant xpFactorUntil;
+    private boolean bonusActive;
 
     private int level;
     private int xp;
@@ -40,7 +44,7 @@ public class User {
     private int xpGoal;
 
     private List<String> spaceIds;
-    private List<String> bonusIds;
+    private Inventory inv;
 
     public void addSpace(String spaceId) {
         this.spaceIds.add(spaceId);
@@ -78,8 +82,6 @@ public class User {
             xpFactorUntil = null;
         }
     }
+    
 
-    public void addFriend(String friendUserId) {
-
-    }
 } 

@@ -4,6 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDate;
+
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -36,6 +39,7 @@ public class Task {
         this.duration = duration;
         this.frequency = frequency;
     }
+
 
     public void markAsCompleted(User user) {
         this.isCompleted = true;

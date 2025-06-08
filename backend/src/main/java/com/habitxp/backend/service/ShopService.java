@@ -28,7 +28,11 @@ public class ShopService {
         if (!bonus.isAffordable(user.getCoins())) return false;
 
         user.setCoins(user.getCoins() - bonus.getCost());
-        bonus.applyTo(user);
+        if(user.isBonusActive()){
+            user.getInv().getBonusIds().add(bonusId);
+        }else{
+            bonus.applyTo(user);
+        }
 
         userRepository.save(user);
         return true;

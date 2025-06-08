@@ -35,7 +35,7 @@ public class Bonus {
             case XP_BOOST -> {
                 user.setXpFactor(reward);
                 user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
-                user.getBonusIds().add(id);
+                user.getInv().getBonusIds().add(id);
                 return reward;
             }
             case HEALTH -> {

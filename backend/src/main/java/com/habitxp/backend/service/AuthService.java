@@ -3,6 +3,7 @@ package com.habitxp.backend.service;
 import com.habitxp.backend.dto.AuthResponse;
 import com.habitxp.backend.dto.LoginRequest;
 import com.habitxp.backend.dto.RegisterRequest;
+import com.habitxp.backend.model.Inventory;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.UserRepository;
 import com.habitxp.backend.security.JwtService;
@@ -55,7 +56,7 @@ public class AuthService {
                 .health(100) // z. B. Standardwert
                 .currentXP(0)
                 .spaceIds(new ArrayList<>())
-                .bonusIds(new ArrayList<>())
+                .inv(new Inventory())
                 .refreshToken(refreshToken)
                 .build();
 
