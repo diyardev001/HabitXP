@@ -16,10 +16,12 @@ public class ShopService {
     private final BonusRepository bonusRepository;
     private final UserRepository userRepository;
 
+    // Gibt alle verfügbaren Boni zurück
     public List<Bonus> listBonuses() {
         return bonusRepository.findAll();
     }
 
+    // Verkauft einen Bonus an einen User (wenn leistbar)
     public boolean sellBonus(String userId, String bonusId) {
         User user = userRepository.findById(userId).orElse(null);
         Bonus bonus = bonusRepository.findById(bonusId).orElse(null);
@@ -28,11 +30,7 @@ public class ShopService {
         if (!bonus.isAffordable(user.getCoins())) return false;
 
         user.setCoins(user.getCoins() - bonus.getCost());
-        if(user.isBonusActive()){
-            user.getInv().getBonusIds().add(bonusId);
-        }else{
-            bonus.applyTo(user);
-        }
+        bonus.applyTo(user);
 
         userRepository.save(user);
         return true;

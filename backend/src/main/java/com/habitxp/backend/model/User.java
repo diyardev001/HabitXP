@@ -27,6 +27,7 @@ public class User {
     private String email;
     private String password;
 
+    private int maxHealth;
     private int health;
     private int coins;
 
@@ -44,7 +45,8 @@ public class User {
     private int xpGoal;
 
     private List<String> spaceIds;
-    private Inventory inv;
+    private List<String> bonusIds;
+    private List<String> avatars;
 
     public void addSpace(String spaceId) {
         this.spaceIds.add(spaceId);

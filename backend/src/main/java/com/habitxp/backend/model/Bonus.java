@@ -35,15 +35,16 @@ public class Bonus {
             case XP_BOOST -> {
                 user.setXpFactor(reward);
                 user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
-                user.getInv().getBonusIds().add(id);
                 return reward;
             }
             case HEALTH -> {
-                user.setHealth(user.getHealth()+reward);
+                if(user.getHealth()<user.getMaxHealth()){
+                    user.setHealth(user.getHealth()+reward);
+                    if(user.getHealth()>user.getMaxHealth()){
+                        user.setHealth(user.getMaxHealth());
+                    }
+                }
                 return reward;
-            }
-            case SKIPPER -> {
-                return 0;
             }
 
             default -> throw new UnsupportedOperationException("Unbekannter Bonustyp: " + type);
