@@ -1,5 +1,7 @@
 package com.habitxp.backend.model;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +11,14 @@ import java.time.LocalDate;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.temporal.WeekFields;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Collectors;
 
 @Data
 @Builder
@@ -21,18 +31,27 @@ public class Task {
     private String id;
     private String userId;
 
+    @NotBlank
     private String title;
+    @NotNull
     private String duration;
+    @NotNull
     private Integer times; // Anzahl Wiederholungen pro Zeitintervall
     private boolean isCompleted;
 
     private int rewardXP;
     private int rewardCoins;
+    @NotNull
     private Frequency frequency;
     private int streak;
 
     private String spaceId;
     private String color;
+    private String accent;
+    private String colorCompleted;
+
+    @Builder.Default
+    private List<Completion> completions = new ArrayList<>();
 
     public void edit(String title, String duration, Frequency frequency) {
         this.title = title;
@@ -40,18 +59,100 @@ public class Task {
         this.frequency = frequency;
     }
 
+    public boolean markAsCompleted(User user) {
+        LocalDateTime now = LocalDateTime.now();
+        int durationMinutes = parseDurationToMinutes(this.duration);
 
-    public void markAsCompleted(User user) {
-        this.isCompleted = true;
+        // Cleanup old completions after 90 Days
+        completions = completions.stream()
+                .filter(c -> c.getTimestamp().isAfter(now.minusDays(90)))
+                .collect(Collectors.toList());
+
+        // Check Time since last completion
+        Completion lastCompletion = completions.stream()
+                .filter(c -> c.getUserId().equals(user.getId()))
+                .reduce((first, second) -> second) // get latest completion
+                .orElse(null);
+
+        if (lastCompletion != null) {
+            LocalDateTime earliestNext = lastCompletion.getTimestamp().plusMinutes(durationMinutes);
+            if (now.isBefore(earliestNext)) {
+                return false; // Too soon
+            }
+        }
+
+        // Add new Completion
+        completions.add(Completion.builder()
+                .timestamp(now)
+                .userId(user.getId())
+                .durationMinutes(durationMinutes)
+                .build());
+
+        // XP, Coins, Streak Updates
         this.streak += 1;
         user.setCoins(user.getCoins() + rewardCoins);
         user.xpFactorReset();
         user.setXp(user.getXp() + rewardXP * user.getXpFactor());
-        user.setCoins(user.getCoins() + rewardCoins);
         user.calculateCurrentXP();
         user.calculateLevel();
         user.calculateXPGoal();
 
+        if (isPeriodCompleted()) {
+            this.isCompleted = true;
+        }
+
+        return true;
+    }
+
+    public boolean isPeriodCompleted() {
+        LocalDate now = LocalDate.now();
+
+        List<Completion> currentPeriodCompletions = completions.stream()
+                .filter(c -> isInCurrentPeriod(c.getTimestamp().toLocalDate()))
+                .toList();
+
+        return currentPeriodCompletions.size() >= times;
+    }
+
+    public int remainingCompletions() {
+        if (isCompleted) {
+            return 0;
+        }
+
+        LocalDate now = LocalDate.now();
+
+        List<Completion> currentPeriodCompletions = completions.stream()
+                .filter(c -> isInCurrentPeriod(c.getTimestamp().toLocalDate()))
+                .toList();
+
+        return Math.max(0, times - currentPeriodCompletions.size());
+    }
+
+    private boolean isInCurrentPeriod(LocalDate date) {
+        LocalDate now = LocalDate.now();
+
+        switch (frequency) {
+            case DAILY:
+                return now.isEqual(date);
+            case WEEKLY:
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                return now.get(weekFields.weekOfWeekBasedYear()) == date.get(weekFields.weekOfWeekBasedYear()) && now.getYear() == date.getYear();
+            case MONTHLY:
+                return now.getMonth() == date.getMonth() && now.getYear() == date.getYear();
+            default:
+                return false;
+        }
+    }
+
+    private int parseDurationToMinutes(String duration) {
+        if (duration.endsWith("h")) {
+            int hours = Integer.parseInt(duration.replace("h", "").trim());
+            return hours * 60;
+        } else if (duration.endsWith("min")) {
+            return Integer.parseInt(duration.replace("min", "").trim());
+        } else {
+            throw new IllegalArgumentException("Invalid duration format: " + duration);
+        }
     }
 
     public boolean streakAlive() {

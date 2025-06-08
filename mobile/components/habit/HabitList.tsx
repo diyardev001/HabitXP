@@ -67,7 +67,7 @@ export default function List() {
 
             <FlatList
                 data={filteredData}
-                keyExtractor={(item, index) => index.toString()}
+                keyExtractor={(item) => item.id}
                 renderItem={({item}) => {
                     const match = item.duration?.match(/^(\d+)(min|h)$/);
                     const durationValue = match?.[1] || "0";
@@ -75,6 +75,7 @@ export default function List() {
 
                     return (
                         <Card
+                            id={item.id}
                             title={item.title}
                             durationValue={durationValue}
                             durationUnit={durationUnit}
@@ -83,6 +84,7 @@ export default function List() {
                             done={item.isCompleted}
                             bgcolor={item.color}
                             accent={item.accent ?? "#999"}
+                            colorCompleted={item.colorCompleted}
                         />
                     );
                 }}
