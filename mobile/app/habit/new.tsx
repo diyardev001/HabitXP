@@ -64,8 +64,6 @@ export default function CreateHabitScreen() {
             title,
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             isCompleted: false,
-            rewardXP: 10, // TODO: KI
-            rewardCoins: 5, // TODO: KI
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
             spaceId: space,
