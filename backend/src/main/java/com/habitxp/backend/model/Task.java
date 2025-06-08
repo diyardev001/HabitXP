@@ -88,17 +88,17 @@ public class Task {
                 .durationMinutes(durationMinutes)
                 .build());
 
-        // XP, Coins, Streak Updates
-        this.streak += 1;
-        user.setCoins(user.getCoins() + rewardCoins);
-        user.xpFactorReset();
-        user.setXp(user.getXp() + rewardXP * user.getXpFactor());
-        user.calculateCurrentXP();
-        user.calculateLevel();
-        user.calculateXPGoal();
 
         if (isPeriodCompleted()) {
             this.isCompleted = true;
+            // XP, Coins, Streak Updates
+            this.streak += 1;
+            user.setCoins(user.getCoins() + rewardCoins);
+            user.xpFactorReset();
+            user.setXp(user.getXp() + rewardXP * user.getXpFactor());
+            user.calculateCurrentXP();
+            user.calculateLevel();
+            user.calculateXPGoal();
         }
 
         return true;
