@@ -1,5 +1,5 @@
 import {Ionicons} from '@expo/vector-icons';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
 import {completeTask, getTaskStatus} from "@/services/taskService";
 import {Colors} from "@/constants/Colors";
@@ -98,11 +98,6 @@ export default function Card({
                 <View
                     style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}
                 >
-                    <Image
-                        style={[{padding: 12, marginRight: 4}]}
-                        source={require('@/assets/images/icons/habit/timer.png')}
-                    />
-
                     <Text style={styles.label}>{title}</Text>
                 </View>
             </View>
@@ -117,9 +112,11 @@ export default function Card({
                 </Text>
 
                 <TouchableOpacity onPress={handleComplete}>
-                    <Image
-                        source={require('@/assets/images/icons/home/check.png')}
-                        style={{width: 50, height: 50, marginRight: 10}}
+                    <Ionicons
+                        name={"checkmark-circle"}
+                        size={50}
+                        color={"white"}
+                        style={{opacity: isCompleted ? 0.4 : 1}}
                     />
                 </TouchableOpacity>
             </View>
@@ -159,9 +156,10 @@ const styles = StyleSheet.create({
         padding: 2,
     },
     label: {
-        fontSize: 16,
+        fontSize: 20,
         color: '#fff',
         fontWeight: 'bold',
+        paddingLeft: 16
     },
     deadline: {
         alignSelf: 'flex-end',
