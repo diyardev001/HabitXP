@@ -3,6 +3,7 @@ import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
 import {completeTask, getTaskStatus} from "@/services/taskService";
 import ConfettiCannon from "react-native-confetti-cannon";
+import {Colors} from "@/constants/Colors";
 
 interface CardProps {
     id: string;
@@ -12,9 +13,7 @@ interface CardProps {
     times: number;
     frequency: string;
     done: boolean;
-    bgcolor: string;
-    accent: string;
-    colorCompleted: string;
+    colorKey: keyof typeof Colors.habit;
 }
 
 const frequencyMap: Record<string, string> = {
@@ -31,20 +30,21 @@ export default function Card({
                                  times,
                                  frequency,
                                  done,
-                                 bgcolor,
-                                 accent,
-                                 colorCompleted,
+                                 colorKey,
                              }: Readonly<CardProps>) {
     const [isCompleted, setIsCompleted] = useState(done);
     const [backgroundColor, setBackgroundColor] = useState(done ? colorCompleted : bgcolor);
     const [remaining, setRemaining] = useState(times);
     const [showConfetti, setShowConfetti] = useState(false);
+    const colorSet = Colors.habit[colorKey];
+    const backgroundColor = isCompleted ? colorSet.completed : colorSet.bg;
+    const accentColor = isCompleted ? colorSet.completedAccent : colorSet.ac;
 
     useEffect(() => {
         async function fetchStatus() {
             try {
                 const status = await getTaskStatus(id);
-                setIsCompleted(status.isCompleted);
+                setIsCompleted(status.completed);
                 setRemaining(status.remaining);
             } catch (error) {
                 console.error("Fehler beim Laden des Status:", error);
@@ -71,18 +71,19 @@ export default function Card({
     };
 
     return (
-        <View style={[styles.container, {backgroundColor}]}>
+        <View
+            style={[styles.container, {backgroundColor}]}>
             <View>
                 <View style={styles.top}>
                     {/* Badge */}
-                    <View style={[styles.timeBadge, {backgroundColor: accent}]}>
+                    <View style={[styles.timeBadge, {backgroundColor: accentColor}]}>
                         <Text style={styles.duration}>
                             {durationValue} {durationUnit === "HOURS"
                             ? (durationValue === "1" ? "Stunde" : "Stunden")
                             : (durationValue === "1" ? "Minute" : "Minuten")}
                         </Text>
                     </View>
-                    <TouchableOpacity style={[styles.editButton, {backgroundColor: accent}]}>
+                    <TouchableOpacity style={[styles.editButton, {backgroundColor: accentColor}]}>
                         <Ionicons name="ellipsis-vertical" size={16} color="white"/>
                     </TouchableOpacity>
                 </View>

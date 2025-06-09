@@ -19,9 +19,7 @@ export default function CreateHabitScreen() {
     const [durationValue, setDurationValue] = useState("15");
     const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
-    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit | null>(null);
-    const selectedColor = selectedColorKey ? Colors.habit[selectedColorKey] : null;
-
+    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit>();
 
     const colors = useTheme();
     const colorOptions = Object.entries(Colors.habit);
@@ -54,7 +52,7 @@ export default function CreateHabitScreen() {
             alert("Bitte Titel und Space ausfüllen");
             return;
         }
-        if (!selectedColor) {
+        if (!selectedColorKey) {
             alert("Bitte eine Farbe auswählen");
             return;
         }
@@ -67,9 +65,7 @@ export default function CreateHabitScreen() {
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
             spaceId: space,
-            color: selectedColor.bg,
-            accent: selectedColor.ac,
-            colorCompleted: selectedColor.completed,
+            colorKey: selectedColorKey,
         };
 
         try {

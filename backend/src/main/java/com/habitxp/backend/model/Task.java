@@ -46,9 +46,7 @@ public class Task {
     private int streak;
 
     private String spaceId;
-    private String color;
-    private String accent;
-    private String colorCompleted;
+    private String colorKey;
 
     @Builder.Default
     private List<Completion> completions = new ArrayList<>();

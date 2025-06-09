@@ -8,6 +8,5 @@ import lombok.Data;
 public class StatusResponse {
     private boolean isCompleted;
     private int remaining;
-    private String color;
-    private String colorCompleted;
+    private String colorKey;
 }
