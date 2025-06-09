@@ -11,6 +11,7 @@ import {router} from "expo-router";
 import {createTask} from "@/services/taskService";
 import DropdownSelect from "@/components/DropdownSelect";
 import {Colors} from "@/constants/Colors";
+import {NewTask} from "@/types/task";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -58,12 +59,12 @@ export default function CreateHabitScreen() {
         }
 
         //const spaceData = await getSpaceById(space);
-        const habit = {
+        const habit: NewTask = {
             title,
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
-            isCompleted: false,
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
+            completed: false,
             spaceId: space,
             colorKey: selectedColorKey,
         };
@@ -181,19 +182,21 @@ export default function CreateHabitScreen() {
 const styles = StyleSheet.create({
     backButton: {
         position: "absolute",
-        top: 65,
-        zIndex: 10
+        top: 15,
+        left: 16,
+        zIndex: 10,
     },
     scroll: {
         flexGrow: 1,
-        justifyContent: "center",
-        paddingBottom: 40,
+        justifyContent: "flex-start",
+        paddingTop: 60,
+        paddingBottom: 30,
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 32,
+        marginBottom: 24,
     },
     headerIcon: {
         marginRight: 10,
@@ -202,7 +205,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 8,
-        marginTop: 16
+        marginTop: 12
     },
     row: {
         flexDirection: "row",
