@@ -33,6 +33,8 @@ public class User {
 
     private int streak;
     private boolean streakBroken;
+    private boolean StreakFreezeActive;
+    private Instant StreakFreezeUntil;
 
     @Builder.Default
     private int xpFactor = 1;
@@ -44,9 +46,13 @@ public class User {
     private int currentXP;
     private int xpGoal;
 
+    private int taskLimit;
+
     private List<String> spaceIds;
     private List<String> bonusIds;
+
     private List<String> avatars;
+    private List<String> banner;
 
     public void addSpace(String spaceId) {
         this.spaceIds.add(spaceId);
@@ -56,7 +62,7 @@ public class User {
         this.spaceIds.remove(spaceId);
     }
 
-    public void calculateLevel() {
+    public int calculateLevel() {
         int tempLevel = 0;
         double xpSum = 0;
         while (xp >= xpSum + Math.round(100 * Math.pow(1.2, tempLevel))) {
@@ -64,6 +70,7 @@ public class User {
             tempLevel++;
         }
         this.level = tempLevel;
+        return tempLevel;
     }
 
     public void calculateCurrentXP() {
@@ -84,6 +91,36 @@ public class User {
             xpFactorUntil = null;
         }
     }
+
+    public void streakFreezeReset() {
+        if (StreakFreezeUntil != null && Instant.now().isAfter(xpFactorUntil)) {
+            StreakFreezeActive = false;
+            StreakFreezeUntil = null;
+        }
+    }
+
+    public void levelup(boolean health, boolean taskL){
+        if(health){
+            this.health+=2;
+        }else if(taskL){
+            taskLimit+=1;
+        }
+    }
     
+    public void coinPenalty(){
+        if (coins>=5) {
+            coins-=5;
+        }else{
+            coins=0;
+        }
+    }
+
+    public void healthpenalty(){
+        if (health>=2) {
+            health-=2;
+        }else{
+            health=0;
+        }
+    }
 
 } 

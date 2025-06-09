@@ -1,6 +1,7 @@
 package com.habitxp.backend.service;
 
 import com.habitxp.backend.model.Space;
+import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -22,8 +23,13 @@ public class SpaceService {
         return spaceRepository.findById(id);
     }
 
-    public Space createSpace(Space space) {
-        return spaceRepository.save(space);
+    public Space createSpace(Space space,String userID) {
+        Space spaceT = Space.builder()
+            .name(space.getName())
+            .color(space.getColor())
+            .userId(userID)
+            .build();
+        return spaceRepository.save(spaceT);
     }
 
     public Space updateSpace(Space space) {

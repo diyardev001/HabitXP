@@ -76,15 +76,13 @@ public class AIAgentService {
                         Titel: %s
                         Dauer: %s
                         Wiederholungen: %s
-                        Streak: %d
                         
                         Gib nur eine ganze Zahl zwischen 1 und 100 als Antwort zurück.
                         """,
                 type,
                 task.getTitle(),
                 task.getDuration(),
-                task.getTimes() != null ? task.getTimes() : "unbekannt",
-                task.getStreak()
+                task.getTimes() != null ? task.getTimes() : "unbekannt"
         );
     }
 }

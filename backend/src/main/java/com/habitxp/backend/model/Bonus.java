@@ -46,6 +46,11 @@ public class Bonus {
                 }
                 return reward;
             }
+            case StreakFreeze -> {
+                user.setStreakFreezeActive(true);
+                user.setStreakFreezeUntil(Instant.now().plus(Duration.ofHours(duration)));
+                return 0;
+            }
 
             default -> throw new UnsupportedOperationException("Unbekannter Bonustyp: " + type);
         }
