@@ -3,9 +3,7 @@ package com.habitxp.backend.controller;
 import com.habitxp.backend.dto.CompletionResponse;
 import com.habitxp.backend.dto.StatusResponse;
 import com.habitxp.backend.model.Task;
-import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.SpaceRepository;
-import com.habitxp.backend.repository.TaskRepository;
 import com.habitxp.backend.service.TaskService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -13,7 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -23,7 +20,6 @@ import java.util.List;
 public class TaskController {
 
     private final TaskService taskService;
-    private final TaskRepository taskRepository;
     private final SpaceRepository spaceRepository;
 
     @GetMapping
@@ -34,9 +30,7 @@ public class TaskController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Task> getTask(@PathVariable String id) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        return ResponseEntity.ok(task);
+        return ResponseEntity.ok(taskService.getTaskById(id));
     }
 
     @PostMapping
@@ -55,10 +49,9 @@ public class TaskController {
     @PutMapping("/{id}")
     public ResponseEntity<Task> updateTask(@PathVariable String id, @RequestBody Task updatedTask) {
         if (!id.equals(updatedTask.getId())) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Mismatched task ID");
+            throw new IllegalArgumentException("Mismatched task ID");
         }
-        Task savedTask = taskService.updateTask(updatedTask);
-        return ResponseEntity.ok(savedTask);
+        return ResponseEntity.ok(taskService.updateTask(updatedTask));
     }
 
     @DeleteMapping("/{id}")
@@ -71,18 +64,13 @@ public class TaskController {
 
     @PostMapping("/{id}/complete")
     public ResponseEntity<CompletionResponse> completeTask(@PathVariable String id, Authentication auth) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        User user = User.builder().id(auth.getName()).build();
-        CompletionResponse response = taskService.completeTask(task, user);
+        CompletionResponse response = taskService.completeTask(id, auth.getName());
         return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}/status")
-    public ResponseEntity<StatusResponse> getTaskStatus(@PathVariable String id, Authentication auth) {
-        Task task = taskRepository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
-        StatusResponse status = taskService.getTaskStatus(task);
+    public ResponseEntity<StatusResponse> getTaskStatus(@PathVariable String id) {
+        StatusResponse status = taskService.getTaskStatus(id);
         return ResponseEntity.ok(status);
     }
 }
