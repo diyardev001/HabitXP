@@ -52,7 +52,8 @@ public class AuthService {
                 .xpGoal(100)
                 .coins(0)
                 .level(1)
-                .health(100) // z. B. Standardwert
+                .health(100)
+                .maxHealth(100)
                 .currentXP(0)
                 .spaceIds(new ArrayList<>())
                 .bonusIds(new ArrayList<>())

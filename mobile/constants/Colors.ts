@@ -16,17 +16,56 @@ export const Colors = {
         secondary: '#292929',
     },
     habit: {
-        coral: {bg: '#EF5151', ac: '#F97F7F', completed: '#f28b82'},
-        blue: {bg: '#4285F4', ac: '#609dfa', completed: '#aecbfa'},
-        yellow: {bg: '#FFB300', ac: '#FFE082', completed: '#fff475'},
-        green: {bg: '#2eae62', ac: '#49cc7f', completed: '#ccff90'},
-        pink: {bg: '#EC4E91', ac: '#FF91C7', completed: '#f48fb1'},
-        cyan: {bg: '#26C6DA', ac: '#62F8FF', completed: '#b2ebf2'},
-        gold: {bg: '#FFCE43', ac: '#FFF59D', completed: '#ffe57f'},
-        indigo: {bg: '#5A6BFF', ac: '#97A2FF', completed: '#c5cae9'},
-        salmon: {bg: '#F06262', ac: '#FF908B', completed: '#ffab91'},
-        orange: {bg: '#FF9800', ac: '#FFB74D', completed: '#ffcc80'},
+        coral: {
+            bg: '#992323',
+            ac: '#B23838',
+            completed: 'rgba(153, 35, 35, 0.5)',
+            completedAccent: 'rgba(178, 56, 56, 0.5)'
+        },
+        blue: {
+            bg: '#2151A8',
+            ac: '#3A6BCC',
+            completed: 'rgba(33, 81, 168, 0.5)',
+            completedAccent: 'rgba(58, 107, 204, 0.5)'
+        },
+        green: {
+            bg: '#1D7A42',
+            ac: '#279456',
+            completed: 'rgba(29, 122, 66, 0.5)',
+            completedAccent: 'rgba(39, 148, 86, 0.5)'
+        },
+        pink: {
+            bg: '#8C2C5F',
+            ac: '#A83A74',
+            completed: 'rgba(140, 44, 95, 0.5)',
+            completedAccent: 'rgba(168, 58, 116, 0.5)'
+        },
+        cyan: {
+            bg: '#167E8A',
+            ac: '#2195A3',
+            completed: 'rgba(22, 126, 138, 0.5)',
+            completedAccent: 'rgba(33, 149, 163, 0.5)'
+        },
+        gold: {
+            bg: '#B38D00',
+            ac: '#CC9F00',
+            completed: 'rgba(179, 141, 0, 0.5)',
+            completedAccent: 'rgba(204, 159, 0, 0.5)'
+        },
+        salmon: {
+            bg: '#994444',
+            ac: '#B35A5A',
+            completed: 'rgba(153, 68, 68, 0.5)',
+            completedAccent: 'rgba(179, 90, 90, 0.5)'
+        },
+        orange: {
+            bg: '#B36B00',
+            ac: '#CC7D00',
+            completed: 'rgba(179, 107, 0, 0.5)',
+            completedAccent: 'rgba(204, 125, 0, 0.5)'
+        },
     },
+
     gamification: {
         health: '#ff6066',
         xp: '#fbbc05',

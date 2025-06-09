@@ -1,8 +1,10 @@
 import {Ionicons} from '@expo/vector-icons';
-import {Image, StyleSheet, Text, TouchableOpacity, View} from 'react-native';
+import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
 import {useEffect, useState} from "react";
 import {completeTask, getTaskStatus} from "@/services/taskService";
-import ConfettiCannon from "react-native-confetti-cannon";
+import {Colors} from "@/constants/Colors";
+import RewardModal from "@/components/RewardModal";
+import {RewardItem} from "@/types/reward";
 
 interface CardProps {
     id: string;
@@ -12,9 +14,8 @@ interface CardProps {
     times: number;
     frequency: string;
     done: boolean;
-    bgcolor: string;
-    accent: string;
-    colorCompleted: string;
+    colorKey: keyof typeof Colors.habit;
+    onComplete: () => void;
 }
 
 const frequencyMap: Record<string, string> = {
@@ -31,20 +32,23 @@ export default function Card({
                                  times,
                                  frequency,
                                  done,
-                                 bgcolor,
-                                 accent,
-                                 colorCompleted,
+                                 colorKey,
+                                 onComplete
                              }: Readonly<CardProps>) {
     const [isCompleted, setIsCompleted] = useState(done);
-    const [backgroundColor, setBackgroundColor] = useState(done ? colorCompleted : bgcolor);
     const [remaining, setRemaining] = useState(times);
-    const [showConfetti, setShowConfetti] = useState(false);
+    const [showModal, setShowModal] = useState(false);
+    const [rewards, setRewards] = useState<RewardItem[]>([]);
+
+    const colorSet = Colors.habit[colorKey];
+    const backgroundColor = isCompleted ? colorSet.completed : colorSet.bg;
+    const accentColor = isCompleted ? colorSet.completedAccent : colorSet.ac;
 
     useEffect(() => {
         async function fetchStatus() {
             try {
                 const status = await getTaskStatus(id);
-                setIsCompleted(status.isCompleted);
+                setIsCompleted(status.completed);
                 setRemaining(status.remaining);
             } catch (error) {
                 console.error("Fehler beim Laden des Status:", error);
@@ -55,45 +59,45 @@ export default function Card({
     }, [id]);
 
     const handleComplete = async () => {
+        if (isCompleted) return;
+
         try {
             const response = await completeTask(id);
-            setIsCompleted(response.isCompleted);
-            setRemaining(response.remaining);
-            setBackgroundColor(colorCompleted);
-
-            if (response.isCompleted) {
-                setShowConfetti(true);
-                setTimeout(() => setShowConfetti(false), 3000);
+            if (response.completed) {
+                setRewards([
+                    {label: "XP", value: response.rewardXP},
+                    {label: "Coins", value: response.rewardCoins},
+                ]);
+                setShowModal(true);
+                onComplete();
             }
+            setIsCompleted(response.completed);
+            setRemaining(response.remaining);
         } catch (error) {
             console.error("Fehler beim Abschließen des Tasks:", error);
         }
     };
 
     return (
-        <View style={[styles.container, {backgroundColor}]}>
+        <View
+            style={[styles.container, {backgroundColor}]}>
             <View>
                 <View style={styles.top}>
                     {/* Badge */}
-                    <View style={[styles.timeBadge, {backgroundColor: accent}]}>
+                    <View style={[styles.timeBadge, {backgroundColor: accentColor}]}>
                         <Text style={styles.duration}>
                             {durationValue} {durationUnit === "HOURS"
                             ? (durationValue === "1" ? "Stunde" : "Stunden")
                             : (durationValue === "1" ? "Minute" : "Minuten")}
                         </Text>
                     </View>
-                    <TouchableOpacity style={[styles.editButton, {backgroundColor: accent}]}>
+                    <TouchableOpacity style={[styles.editButton, {backgroundColor: accentColor}]}>
                         <Ionicons name="ellipsis-vertical" size={16} color="white"/>
                     </TouchableOpacity>
                 </View>
                 <View
                     style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}
                 >
-                    <Image
-                        style={[{padding: 12, marginRight: 4}]}
-                        source={require('@/assets/images/icons/habit/timer.png')}
-                    />
-
                     <Text style={styles.label}>{title}</Text>
                 </View>
             </View>
@@ -108,16 +112,22 @@ export default function Card({
                 </Text>
 
                 <TouchableOpacity onPress={handleComplete}>
-                    <Image
-                        source={require('@/assets/images/icons/home/check.png')}
-                        style={{width: 50, height: 50, marginRight: 10}}
+                    <Ionicons
+                        name={"checkmark-circle"}
+                        size={50}
+                        color={"white"}
+                        style={{opacity: isCompleted ? 0.4 : 1}}
                     />
                 </TouchableOpacity>
             </View>
 
-            {showConfetti && (
-                <ConfettiCannon count={150} origin={{x: 200, y: 200}} fadeOut={true}/>
-            )}
+            <RewardModal
+                visible={showModal}
+                onClose={() => setShowModal(false)}
+                title={"Habit abgeschlossen!"}
+                description={"Du hast Belohnungen erhalten:"}
+                rewards={rewards}
+            />
         </View>
     );
 }
@@ -146,9 +156,10 @@ const styles = StyleSheet.create({
         padding: 2,
     },
     label: {
-        fontSize: 16,
+        fontSize: 20,
         color: '#fff',
         fontWeight: 'bold',
+        paddingLeft: 16
     },
     deadline: {
         alignSelf: 'flex-end',

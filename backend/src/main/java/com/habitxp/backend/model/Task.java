@@ -6,9 +6,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-
-import java.time.LocalDate;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
@@ -46,9 +43,7 @@ public class Task {
     private int streak;
 
     private String spaceId;
-    private String color;
-    private String accent;
-    private String colorCompleted;
+    private String colorKey;
 
     @Builder.Default
     private List<Completion> completions = new ArrayList<>();
@@ -126,6 +121,30 @@ public class Task {
                 .toList();
 
         return Math.max(0, times - currentPeriodCompletions.size());
+    }
+
+    public void updateCompletionStatus() {
+        if (completions.isEmpty()) {
+            this.isCompleted = false;
+            return;
+        }
+
+        Completion lastCompletion = completions.stream()
+                .filter(completion -> completion.getUserId() != null)
+                .max((completion1, completion2) -> completion1.getTimestamp().compareTo(completion2.getTimestamp()))
+                .orElse(null);
+
+        if (lastCompletion == null) {
+            this.isCompleted = false;
+            return;
+        }
+
+        LocalDate lastCompletionDate = lastCompletion.getTimestamp().toLocalDate();
+        boolean stillInSamePeriod = isInCurrentPeriod(lastCompletionDate);
+
+        if (!stillInSamePeriod) {
+            this.isCompleted = false;
+        }
     }
 
     private boolean isInCurrentPeriod(LocalDate date) {

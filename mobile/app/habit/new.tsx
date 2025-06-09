@@ -11,6 +11,7 @@ import {router} from "expo-router";
 import {createTask} from "@/services/taskService";
 import DropdownSelect from "@/components/DropdownSelect";
 import {Colors} from "@/constants/Colors";
+import {NewTask} from "@/types/task";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -19,9 +20,7 @@ export default function CreateHabitScreen() {
     const [durationValue, setDurationValue] = useState("15");
     const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
-    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit | null>(null);
-    const selectedColor = selectedColorKey ? Colors.habit[selectedColorKey] : null;
-
+    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit>();
 
     const colors = useTheme();
     const colorOptions = Object.entries(Colors.habit);
@@ -54,22 +53,20 @@ export default function CreateHabitScreen() {
             alert("Bitte Titel und Space ausfüllen");
             return;
         }
-        if (!selectedColor) {
+        if (!selectedColorKey) {
             alert("Bitte eine Farbe auswählen");
             return;
         }
 
         //const spaceData = await getSpaceById(space);
-        const habit = {
+        const habit: NewTask = {
             title,
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
-            isCompleted: false,
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
+            completed: false,
             spaceId: space,
-            color: selectedColor.bg,
-            accent: selectedColor.ac,
-            colorCompleted: selectedColor.completed,
+            colorKey: selectedColorKey,
         };
 
         try {
@@ -185,19 +182,21 @@ export default function CreateHabitScreen() {
 const styles = StyleSheet.create({
     backButton: {
         position: "absolute",
-        top: 65,
-        zIndex: 10
+        top: 15,
+        left: 16,
+        zIndex: 10,
     },
     scroll: {
         flexGrow: 1,
-        justifyContent: "center",
-        paddingBottom: 40,
+        justifyContent: "flex-start",
+        paddingTop: 60,
+        paddingBottom: 30,
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 32,
+        marginBottom: 24,
     },
     headerIcon: {
         marginRight: 10,
@@ -206,7 +205,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 8,
-        marginTop: 16
+        marginTop: 12
     },
     row: {
         flexDirection: "row",
