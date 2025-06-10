@@ -1,27 +1,29 @@
-import { StyleSheet, Text, View, Pressable, Dimensions } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Dimensions, Image } from 'react-native';
 import React, { useState } from 'react';
 import Container from '@/components/Container';
 import useTheme from '@/hooks/useTheme';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
 
+const coinIcon = require('../../assets/images/icons/gamification/coin.png');
+
 const offers = {
   xp: [
-    { title: '1h XP Boost', price: 100 },
-    { title: '3h XP Boost', price: 250 },
-    { title: '12h XP Boost', price: 600 },
-    { title: '24h XP Boost', price: 1000 },
+    { title: '1h XP Boost  ', price: 100 },
+    { title: '3h XP Boost  ', price: 250 },
+    { title: '12h XP Boost  ', price: 600 },
+    { title: '24h XP Boost  ', price: 1000 },
   ],
   skip: [
-    { title: '1x Skip Day', price: 150 },
-    { title: '3x Skip Days', price: 400 },
-    { title: '5x Skip Days', price: 600 },
-    { title: '10x Skip Days', price: 1000 },
+    { title: '1x Skip Day  ', price: 150 },
+    { title: '3x Skip Days  ', price: 400 },
+    { title: '5x Skip Days  ', price: 600 },
+    { title: '10x Skip Days  ', price: 1000 },
   ],
   health: [
-    { title: '+5 Leben', price: 100 },
-    { title: '+20 Leben', price: 350 },
-    { title: '+35 Leben', price: 600 },
-    { title: 'Volle Leben (50)', price: 850 },
+    { title: '+5 Health  ', price: 100 },
+    { title: '+20 Health  ', price: 350 },
+    { title: '+35 Health  ', price: 600 },
+    { title: '+50 Health  ', price: 850 },
   ],
 };
 
@@ -30,7 +32,8 @@ const ShopTab = ({ items, colors }: { items: typeof offers.xp, colors: any }) =>
     {items.map((offer, index) => (
       <Pressable key={index} style={[styles.offerCard, { backgroundColor: colors.card }]}>
         <Text style={[styles.offerTitle, { color: colors.title }]}>{offer.title}</Text>
-        <Text style={styles.offerPrice}>💰 {offer.price}</Text>
+        <Image source={coinIcon} style={styles.coinIcon}/>
+        <Text style={styles.offerPrice}>{offer.price}</Text>
       </Pressable>
     ))}
   </View>
@@ -92,17 +95,26 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   offerCard: {
+         flexDirection: 'row',
+         //height: '10000'
     borderRadius: 16,
     padding: 20,
     marginBottom: 15,
+    borderWidth: 1,
+    borderColor: '#ccc',
   },
   offerTitle: {
-    fontSize: 18,
+    fontSize: 20,
     marginBottom: 8,
   },
   offerPrice: {
     color: '#FFD700',
-    fontSize: 16,
+    fontSize: 18,
     fontWeight: 'bold',
+  },
+  coinIcon: {
+      width: 22,
+     height: 22,
+     marginRight: 8,
   },
 });
