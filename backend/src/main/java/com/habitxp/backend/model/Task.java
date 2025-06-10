@@ -32,6 +32,7 @@ public class Task {
     private String title;
     @NotNull
     private String duration;
+    private LocalDate Deadline;
     @NotNull
     private Integer times; // Anzahl Wiederholungen pro Zeitintervall
     private boolean isCompleted;
@@ -40,7 +41,7 @@ public class Task {
     private int rewardCoins;
     @NotNull
     private Frequency frequency;
-    private int streak;
+    
 
     private String spaceId;
     private String colorKey;
@@ -86,15 +87,24 @@ public class Task {
 
         if (isPeriodCompleted()) {
             this.isCompleted = true;
-            // XP, Coins, Streak Updates
-            this.streak += 1;
+            //Updates
+            user.setStreakBroken(false);
+
+            //Belohnung
             user.setCoins(user.getCoins() + rewardCoins);
             user.xpFactorReset();
             user.setXp(user.getXp() + rewardXP * user.getXpFactor());
+
+            //Überprüfungen
+            int level=user.getLevel();
             user.calculateCurrentXP();
-            user.calculateLevel();
+                //LevelUP
+            if(level<user.calculateLevel()){
+                user.levelup(true,false);
+            }
             user.calculateXPGoal();
         }
+
 
         return true;
     }
@@ -174,7 +184,4 @@ public class Task {
         }
     }
 
-    public boolean streakAlive() {
-        return this.streak > 0;
-    }
 } 
