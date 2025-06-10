@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -23,7 +24,8 @@ public class Space {
     private String name;
     private String color;
 
-    private List<String> taskIds;
+    @Builder.Default
+    private List<String> taskIds = new ArrayList<>();
 
     public void addTask(String taskId) {
         this.taskIds.add(taskId);

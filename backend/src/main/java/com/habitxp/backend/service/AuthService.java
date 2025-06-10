@@ -54,6 +54,8 @@ public class AuthService {
                 .currentXP(0)
                 .spaceIds(new ArrayList<>())
                 .bonusIds(new ArrayList<>())
+                .avatars(new ArrayList<>())
+                .banner(new ArrayList<>())
                 .build();
 
         userRepository.save(user);

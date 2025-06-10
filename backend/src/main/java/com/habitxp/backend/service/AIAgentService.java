@@ -70,21 +70,31 @@ public class AIAgentService {
 
     private String buildPrompt(Task task, String type) {
         return String.format("""
-                        Du bist ein intelligenter Belohnungsagent in einer Gamification-App.
-                        Berechne die %s-Belohnung für die folgende Aufgabe:
-                        
-                        Titel: %s
-                        Dauer: %s
-                        Wiederholungen: %s
-                        Streak: %d
-                        
-                        Gib nur eine ganze Zahl zwischen 1 und 100 als Antwort zurück.
-                        """,
-                type,
-                task.getTitle(),
-                task.getDuration(),
-                task.getTimes() != null ? task.getTimes() : "unbekannt",
-                task.getStreak()
+            Du bist ein intelligenter Belohnungsagent in einer Gamification-App.
+
+            Bewerte die folgende Aufgabe im Hinblick auf ihre %s-Belohnung.
+            Nutze dabei eine ganzzahlige Skala von 1 (sehr leicht, geringer Wert) bis 100 (sehr schwer, hoher Wert).
+
+            Berücksichtige bei deiner Bewertung:
+            - Die geistige oder körperliche Anstrengung der Aufgabe
+            - Die geschätzte Zeitdauer (z. B. Minuten oder Stunden)
+            - Die Anzahl der Wiederholungen
+            - Den möglichen Nutzen für persönliche Entwicklung, Gesundheit oder Produktivität
+
+            Gib **ausschließlich** eine ganze Zahl zwischen 1 und 100 als Antwort zurück.
+
+            --- Aufgabe ---
+            Titel: %s
+            Dauer: %s
+            Wiederholungen: %s
+            ----------------
+            """,
+            type,
+            task.getTitle(),
+            task.getDuration(),
+            task.getTimes() != null ? task.getTimes() : "unbekannt"
         );
     }
+
+
 }
