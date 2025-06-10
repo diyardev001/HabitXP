@@ -1,5 +1,5 @@
 import {useState} from "react";
-import {Modal, Pressable, ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
+import {ScrollView, StyleSheet, TouchableOpacity, View} from "react-native";
 import Container from "@/components/Container";
 import Title from "@/components/Title";
 import {Ionicons} from "@expo/vector-icons";
@@ -8,45 +8,44 @@ import InputField from "@/components/InputField";
 import NormalText from "@/components/NormalText";
 import PrimaryButton from "@/components/PrimaryButton";
 import {router} from "expo-router";
-import {createHabit} from "@/services/habitService";
+import {createTask} from "@/services/taskService";
+import DropdownSelect from "@/components/DropdownSelect";
+import {Colors} from "@/constants/Colors";
+import {NewTask} from "@/types/task";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
     const [frequency, setFrequency] = useState("DAILY");
     const [times, setTimes] = useState("1");
-    const [duration, setDuration] = useState("15min");
-    const [customFreqUnit, setCustomFreqUnit] = useState("DAYS");
-    const [customFreqValue, setCustomFreqValue] = useState("3");
+    const [durationValue, setDurationValue] = useState("15");
+    const [durationUnit, setDurationUnit] = useState<"MINUTES" | "HOURS">("MINUTES");
     const [space, setSpace] = useState("");
-    const [color, setColor] = useState("#a78bfa");
-    const [showUnitDropdown, setShowUnitDropdown] = useState(false);
+    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit>();
 
     const colors = useTheme();
+    const colorOptions = Object.entries(Colors.habit);
 
     const frequencyOptions = [
         {label: "Täglich", value: "DAILY"},
         {label: "Wöchentlich", value: "WEEKLY"},
         {label: "Monatlich", value: "MONTHLY"},
-        {label: "Halbjährlich", value: "SEMESTERLY"},
-        {label: "Jährlich", value: "YEARLY"},
-        {label: "Benutzerdefiniert", value: "CUSTOM"},
+        {label: "Keine", value: "NONE"},
     ];
 
     const frequencyLabels: Record<string, string> = {
         DAILY: "Tag",
         WEEKLY: "Woche",
-        MONTHLY: "Monat",
-        SEMESTERLY: "Halbjahr",
-        YEARLY: "Jahr",
-        CUSTOM: "Zeitraum",
+        MONTHLY: "Monat"
     };
 
-    const colorOptions = ["#a78bfa", "#f472b6", "#60a5fa", "#34d399", "#fcd34d"];
+    const getDurationLabel = (unit: "MINUTES" | "HOURS", value: string) =>
+        unit === "HOURS"
+            ? value === "1" ? "Stunde" : "Stunden"
+            : value === "1" ? "Minute" : "Minuten";
 
-    const customFreqUnitOptions = [
-        {label: "Tage", value: "DAYS"},
-        {label: "Wochen", value: "WEEKS"},
-        {label: "Monate", value: "MONTHS"},
+    const durationOptions = [
+        {label: getDurationLabel("MINUTES", durationValue), value: "MINUTES"},
+        {label: getDurationLabel("HOURS", durationValue), value: "HOURS"},
     ];
 
     const handleCreateHabit = async () => {
@@ -54,30 +53,31 @@ export default function CreateHabitScreen() {
             alert("Bitte Titel und Space ausfüllen");
             return;
         }
+        if (!selectedColorKey) {
+            alert("Bitte eine Farbe auswählen");
+            return;
+        }
 
-        const habit = {
+        //const spaceData = await getSpaceById(space);
+        const habit: NewTask = {
             title,
-            deadline: null, // TODO: entfernen?
-            isCompleted: false,
-            rewardXP: 10, // TODO: KI
-            rewardCoins: 5, // TODO: KI
+            duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             frequency,
-            times: frequency !== "CUSTOM" ? parseInt(times) : null,
-            duration: frequency !== "CUSTOM" ? duration : null,
-            custom: frequency === "CUSTOM" ? {unit: customFreqUnit, value: customFreqValue} : null,
+            times: frequency !== "NONE" ? parseInt(times) : 0,
+            completed: false,
             spaceId: space,
-            color,
+            colorKey: selectedColorKey,
         };
 
         try {
-            await createHabit(habit);
+            const createdHabit = await createTask(habit);
+
+            console.log("Habit erstellt:", createdHabit);
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);
-            alert("Fehler beim Erstellen der Gewohnheit");
+            alert("Fehler beim Erstellen des Habits");
         }
-
-        console.log("Habit wird erstellt:", habit);
     };
 
     return (
@@ -85,6 +85,7 @@ export default function CreateHabitScreen() {
             <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
                 <Ionicons name={"arrow-back"} size={24} color={colors.title}/>
             </TouchableOpacity>
+
             <ScrollView contentContainerStyle={styles.scroll}>
                 <View style={styles.header}>
                     <Ionicons name={"calendar"} size={24} color={colors.primary} style={styles.headerIcon}/>
@@ -104,14 +105,14 @@ export default function CreateHabitScreen() {
                     placeholder={"z.B. Gesundheit"}
                 />
 
-                <NormalText style={styles.label}>Frequenz</NormalText>
+                <NormalText style={styles.label}>Zeitintervall</NormalText>
                 <View style={styles.row}>
                     {frequencyOptions.map((opt) => (
                         <TouchableOpacity
                             key={opt.value}
                             style={[
                                 styles.optionButton,
-                                {backgroundColor: frequency === opt.value ? colors.primary : colors.input},
+                                {backgroundColor: frequency === opt.value ? colors.primary : colors.inputBackground},
                             ]}
                             onPress={() => setFrequency(opt.value)}
                         >
@@ -120,83 +121,54 @@ export default function CreateHabitScreen() {
                     ))}
                 </View>
 
-                {frequency !== "CUSTOM" && (
-                    <View style={styles.row}>
-                        <View style={{flex: 1}}>
+                <View style={styles.timeRow}>
+                    {frequency !== "NONE" && (
+                        <View>
                             <NormalText style={styles.label}>Wie oft
-                                pro {frequencyLabels[frequency] ?? "Zeitraum"}?</NormalText>
+                                pro {frequencyLabels[frequency]}?</NormalText>
                             <InputField
                                 value={times}
                                 onChangeText={setTimes}
-                                placeholder={"3"}
+                                placeholder={"1"}
                                 keyboardType={"numeric"}
+                                style={styles.input}
+                            />
+                        </View>
+                    )}
+
+                    <View>
+                        <NormalText style={styles.label}>Wie lange?</NormalText>
+                        <View style={styles.durationRow}>
+                            <InputField
+                                value={durationValue}
+                                onChangeText={setDurationValue}
+                                placeholder={"15"}
+                                keyboardType={"numeric"}
+                                style={[styles.input, {marginRight: 8}]}
+                            />
+                            <DropdownSelect
+                                value={durationUnit}
+                                data={durationOptions}
+                                onChange={(item) => setDurationUnit(item.value as "MINUTES" | "HOURS")}
+                                style={styles.unitDropdown}
                             />
                         </View>
 
-                        <View style={{flex: 1}}>
-                            <NormalText style={styles.label}>Wie lange?</NormalText>
-                            <InputField
-                                value={duration}
-                                onChangeText={setDuration}
-                                placeholder={"30 min."}
-                            />
-                        </View>
                     </View>
-                )}
-
-                {frequency === "CUSTOM" && (
-                    <>
-                        <NormalText style={styles.label}>Benutzerdefiniert</NormalText>
-                        <View style={styles.row}>
-                            <InputField
-                                value={customFreqValue}
-                                onChangeText={setCustomFreqValue}
-                                placeholder="3"
-                                keyboardType="numeric"
-                                style={{flex: 1}}
-                            />
-                            <TouchableOpacity
-                                style={[styles.optionButton, {flex: 1}]}
-                                onPress={() => setShowUnitDropdown(true)}
-                            >
-                                <NormalText>
-                                    {customFreqUnitOptions.find((u) => u.value === customFreqUnit)?.label || "Einheit"}
-                                </NormalText>
-                            </TouchableOpacity>
-                        </View>
-
-                        <Modal
-                            visible={showUnitDropdown}
-                            transparent
-                            animationType="fade"
-                            onRequestClose={() => setShowUnitDropdown(false)}
-                        >
-                            <TouchableOpacity style={styles.modalOverlay} onPress={() => setShowUnitDropdown(false)}>
-                                <View style={styles.modalContent}>
-                                    {customFreqUnitOptions.map((opt) => (
-                                        <Pressable
-                                            key={opt.value}
-                                            onPress={() => {
-                                                setCustomFreqUnit(opt.value);
-                                                setShowUnitDropdown(false);
-                                            }}
-                                            style={styles.modalItem}
-                                        >
-                                            <NormalText>{opt.label}</NormalText>
-                                        </Pressable>
-                                    ))}
-                                </View>
-                            </TouchableOpacity>
-                        </Modal>
-                    </>
-                )}
-
+                </View>
                 <View style={styles.row}>
-                    {colorOptions.map((c) => (
+                    {colorOptions.map(([key, colorSet]) => (
                         <TouchableOpacity
-                            key={c}
-                            style={[styles.colorCircle, {backgroundColor: c, borderWidth: color === c ? 2 : 0}]}
-                            onPress={() => setColor(c)}
+                            key={key}
+                            style={[
+                                styles.colorCircle,
+                                {
+                                    backgroundColor: colorSet.bg,
+                                    borderWidth: selectedColorKey === key ? 3 : 0,
+                                    borderColor: 'white',
+                                },
+                            ]}
+                            onPress={() => setSelectedColorKey(key as keyof typeof Colors.habit)}
                         />
                     ))}
                 </View>
@@ -210,19 +182,21 @@ export default function CreateHabitScreen() {
 const styles = StyleSheet.create({
     backButton: {
         position: "absolute",
-        top: 65,
-        zIndex: 10
+        top: 15,
+        left: 16,
+        zIndex: 10,
     },
     scroll: {
         flexGrow: 1,
-        justifyContent: "center",
-        paddingBottom: 40,
+        justifyContent: "flex-start",
+        paddingTop: 60,
+        paddingBottom: 30,
     },
     header: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
-        marginBottom: 32,
+        marginBottom: 24,
     },
     headerIcon: {
         marginRight: 10,
@@ -231,7 +205,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
         marginBottom: 8,
-        marginTop: 16
+        marginTop: 12
     },
     row: {
         flexDirection: "row",
@@ -239,16 +213,27 @@ const styles = StyleSheet.create({
         gap: 10,
         alignItems: "center"
     },
+    timeRow: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        gap: 12,
+        marginBottom: 16
+    },
+    input: {
+        width: 100
+    },
+    durationRow: {
+        flexDirection: "row",
+        alignItems: "center"
+    },
+    unitDropdown: {
+        width: 110,
+        marginBottom: 14,
+    },
     optionButton: {
         paddingHorizontal: 14,
         paddingVertical: 10,
         borderRadius: 8
-    },
-    colorCircle: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        marginRight: 10,
     },
     modalOverlay: {
         flex: 1,
@@ -265,4 +250,10 @@ const styles = StyleSheet.create({
     modalItem: {
         paddingVertical: 10,
     },
+    colorCircle: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        margin: 8,
+    }
 })

@@ -4,3 +4,5 @@ spring.data.mongodb.uri=mongodb://localhost:27017/habitxpdb
 jwt.secret=YOUR_SECRET_HERE
 server.address=0.0.0.0
 server.port=8080
+
+openai.api.key=YOUR_OPENAI_API_KEY_HERE

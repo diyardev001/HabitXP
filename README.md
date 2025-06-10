@@ -1,6 +1,7 @@
 Dieses Readme ist Teil der App **"HabitXP"**, einer Habit-Tracking-Anwendung mit Gaming Mechanismen.
 
 ## Team
+
 Members:
 [Dustin](https://www.github.com/),
 [Yassine](https://www.github.com/),
@@ -10,6 +11,7 @@ Members:
 ## Quickstart
 
 ### Backend
+
 Go to the project directory
 
 ```bash, ignore
@@ -21,9 +23,11 @@ Start the server
 ```bash, ignore
   ./mvnw spring-boot:run
 ```
+
 ⚠️ MongoDB muss im Hintergrund laufen
 
 ### Frontend
+
 Go to the project directory
 
 ```bash, ignore
@@ -31,6 +35,7 @@ Go to the project directory
 ```
 
 Start Expo
+
 ```bash, ignore
   npx expo start
   
@@ -50,11 +55,13 @@ Operating System: Windows
 ## Installation and Setup
 
 1. Clone the repository:
+
 ```bash,ignore
 $ git clone https://github.com/diyardev001/HabitXP.git
 ```
 
 2. Navigate to the project directory:
+
 ```bash,ignore
 $ cd HabitXP
 ```
@@ -63,45 +70,34 @@ $ cd HabitXP
 
 Modify configuration files (e.g., `.env`, `application.properties`) as required.
 
-## Authentifizierungs-Endpunkte
+---
 
-#### Register
+## API Dokumentation
 
-```http
-  POST /auth/register
-```
+Für die API-Dokumentation und einfaches Testen verwenden wir **Swagger-UI**.
 
-| Parameter | Type     | Description                |
-| :-------- | :------- | :------------------------- |
-| `username` | `string` | **Required**. Username des Users |
-| `email` | `string` | **Required**. E-Mail-Adresse |
-| `password` | `string` | **Required**. Sicheres Passwort |
+- **Swagger-UI URL**: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
-#### Login
+**Hinweis**:
 
-```http
-  POST /auth/login
-```
+- Die API erfordert ansonsten Authentifizierung via JWT.
 
-| Parameter | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `email`      | `string` | **Required**. E-Mail-Adresse |
-| `password`   | `string` | **Required**. Passwort |
+Mit Swagger kannst du:
 
-#### Get User Profile
+- Alle verfügbaren Endpoints einsehen
+- API Requests direkt im Browser testen
+- Beispiel-Request- und Response-Bodies sehen
 
-```http
-  GET /user/profile
-```
+---
 
-| Header | Type     | Description                       |
-| :-------- | :------- | :-------------------------------- |
-| `Authorization` | `string` | **Required**. Bearer `<JWT_TOKEN>` |
+## Authentifizierung
 
-## Project structure
-Provide an overview of the directory structure to help contributors navigate the project:
+Für geschützte Endpunkte ist ein **JWT Token** erforderlich. Hole dir ein Token über den `/auth/login` Endpoint.
+
+## Projektstruktur
 
 ### Backend
+
 Die Backend-Struktur basiert auf einem typischen Spring Boot Setup mit klarer Trennung von Verantwortlichkeiten:
 
 ```bash,ignore
@@ -131,6 +127,7 @@ backend/
 ```
 
 ### Mobile (Frontend)
+
 Das mobile Frontend basiert auf Expo und folgt einer modularen Projektstruktur:
 
 ```bash,ignore

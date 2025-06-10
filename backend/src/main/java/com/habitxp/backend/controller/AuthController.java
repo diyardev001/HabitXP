@@ -37,7 +37,7 @@ public class AuthController {
             return ResponseEntity.status(401).body("Refresh token invalid or expired.");
         }
 
-        String email = jwtService.extractEmail(refreshToken);
+        String email = jwtService.extractUserId(refreshToken);
         User user = authService.getUserByEmail(email);
 
         if (!refreshToken.equals(user.getRefreshToken())) {

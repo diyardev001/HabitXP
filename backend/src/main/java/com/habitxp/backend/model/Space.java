@@ -18,15 +18,18 @@ public class Space {
 
     @Id
     private String id;
+    private String userId;
 
     private String name;
-    private List<String> habitIds;
+    private String color;
 
-    public void addHabit(String habitId) {
-        this.habitIds.add(habitId);
+    private List<String> taskIds;
+
+    public void addTask(String taskId) {
+        this.taskIds.add(taskId);
     }
 
-    public void removeHabit(String habitId) {
-        this.habitIds.remove(habitId);
+    public void removeTask(String taskId) {
+        this.taskIds.remove(taskId);
     }
 } 

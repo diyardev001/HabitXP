@@ -22,6 +22,7 @@ public class Bonus {
     private String name;
     private String description;
     private int cost;
+    private int reward;
     private BonusType type;
     private int duration;
 
@@ -32,15 +33,20 @@ public class Bonus {
     public int applyTo(User user) {
         switch (type) {
             case XP_BOOST -> {
-                user.setXpFactor(2);
+                user.setXpFactor(reward);
                 user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
-                return 0;
-            }
-            case RANDOM_COIN -> {
-                int reward = new Random().nextInt(191) + 10; // 10–200 Coins
-                user.setCoins(user.getCoins() + reward);
                 return reward;
             }
+            case HEALTH -> {
+                if(user.getHealth()<user.getMaxHealth()){
+                    user.setHealth(user.getHealth()+reward);
+                    if(user.getHealth()>user.getMaxHealth()){
+                        user.setHealth(user.getMaxHealth());
+                    }
+                }
+                return reward;
+            }
+
             default -> throw new UnsupportedOperationException("Unbekannter Bonustyp: " + type);
         }
     }
