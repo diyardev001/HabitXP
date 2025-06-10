@@ -39,9 +39,6 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.CONFLICT, "Username already in use");
         }
 
-        String accessToken = jwtService.generateAccessToken(request.getEmail());
-        String refreshToken = jwtService.generateRefreshToken(request.getEmail());
-
         User user = User.builder()
                 .username(request.getUsername())
                 .email(request.getEmail())
@@ -52,14 +49,21 @@ public class AuthService {
                 .xpGoal(100)
                 .coins(0)
                 .level(1)
-                .health(100) // z. B. Standardwert
+                .health(100)
+                .maxHealth(100)
                 .currentXP(0)
                 .spaceIds(new ArrayList<>())
                 .bonusIds(new ArrayList<>())
-                .refreshToken(refreshToken)
+                .avatars(new ArrayList<>())
+                .banner(new ArrayList<>())
                 .build();
 
+        userRepository.save(user);
 
+        String accessToken = jwtService.generateAccessToken(user.getId());
+        String refreshToken = jwtService.generateRefreshToken(user.getId());
+
+        user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
         return new AuthResponse(accessToken, refreshToken);
@@ -73,8 +77,8 @@ public class AuthService {
             throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Invalid credentials");
         }
 
-        String accessToken = jwtService.generateAccessToken(user.getEmail());
-        String refreshToken = jwtService.generateRefreshToken(user.getEmail());
+        String accessToken = jwtService.generateAccessToken(user.getId());
+        String refreshToken = jwtService.generateRefreshToken(user.getId());
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);

@@ -22,12 +22,12 @@ public class JwtService {
     private final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 Minuten
     private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 Tage
 
-    public String generateAccessToken(String userEmail) {
-        return buildToken(userEmail, ACCESS_EXPIRATION);
+    public String generateAccessToken(String userId) {
+        return buildToken(userId, ACCESS_EXPIRATION);
     }
 
-    public String generateRefreshToken(String userEmail) {
-        return buildToken(userEmail, REFRESH_EXPIRATION);
+    public String generateRefreshToken(String userId) {
+        return buildToken(userId, REFRESH_EXPIRATION);
     }
 
     public String buildToken(String subject, long expiration) {
@@ -39,7 +39,7 @@ public class JwtService {
                 .compact();
     }
 
-    public String extractEmail(String token) {
+    public String extractUserId(String token) {
         return Jwts.parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
