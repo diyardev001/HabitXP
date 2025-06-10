@@ -33,9 +33,14 @@ public class Bonus {
     public int applyTo(User user) {
         switch (type) {
             case XP_BOOST -> {
-                user.setXpFactor(reward);
-                user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
-                return reward;
+                if(!user.isXpBonusActive()){
+                    user.setXpFactor(reward);
+                    user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
+                    user.setXpBonusActive(true);
+                    return reward;
+                }else{
+                    return 0;
+                }
             }
             case HEALTH -> {
                 if(user.getHealth()<user.getMaxHealth()){
@@ -47,9 +52,13 @@ public class Bonus {
                 return reward;
             }
             case StreakFreeze -> {
-                user.setStreakFreezeActive(true);
-                user.setStreakFreezeUntil(Instant.now().plus(Duration.ofHours(duration)));
-                return 0;
+                if(!user.isStreakFreezeActive()){
+                    user.setStreakFreezeActive(true);
+                    user.setStreakFreezeUntil(Instant.now().plus(Duration.ofHours(duration)));
+                    return duration;
+                }else{
+                    return 0;
+                }
             }
 
             default -> throw new UnsupportedOperationException("Unbekannter Bonustyp: " + type);

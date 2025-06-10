@@ -39,7 +39,7 @@ public class User {
     @Builder.Default
     private int xpFactor = 1;
     private Instant xpFactorUntil;
-    private boolean bonusActive;
+    private boolean xpBonusActive;
 
     private int level;
     private int xp;
@@ -89,11 +89,12 @@ public class User {
         if (xpFactorUntil != null && Instant.now().isAfter(xpFactorUntil)) {
             xpFactor = 1;
             xpFactorUntil = null;
+            xpBonusActive=false;
         }
     }
 
     public void streakFreezeReset() {
-        if (StreakFreezeUntil != null && Instant.now().isAfter(xpFactorUntil)) {
+        if (StreakFreezeUntil != null && Instant.now().isAfter(getStreakFreezeUntil())) {
             StreakFreezeActive = false;
             StreakFreezeUntil = null;
         }

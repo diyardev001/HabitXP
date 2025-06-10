@@ -1,7 +1,6 @@
 package com.habitxp.backend.service;
 
 import com.habitxp.backend.model.Space;
-import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.SpaceRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

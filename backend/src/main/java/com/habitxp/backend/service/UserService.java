@@ -5,10 +5,8 @@ import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service

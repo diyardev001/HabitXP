@@ -12,7 +12,6 @@ import java.time.LocalDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.WeekFields;
 import java.util.ArrayList;
@@ -92,7 +91,7 @@ public class Task {
 
         if (isPeriodCompleted()) {
             this.isCompleted = true;
-            //Streak Updates
+            //Updates
             user.setStreakBroken(false);
 
             //Belohnung

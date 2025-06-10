@@ -1,13 +1,15 @@
 package com.habitxp.backend.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
+
 
 import com.habitxp.backend.repository.UserRepository;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import com.habitxp.backend.model.Frequency;
 import com.habitxp.backend.model.Space;
 import com.habitxp.backend.model.Task;
 import com.habitxp.backend.model.User;
@@ -22,7 +24,7 @@ public class SchedulerService {
     UserRepository userRepository;
     UserService userService;
 
-    @Scheduled(cron = "0 0 * * * *") // stündlich
+    @Scheduled(cron = "0 0 * * * *") // jede Stunde
     public void checkDeadlineTask() {
         List<Task> allTasks = taskRepository.findAll();
         LocalDate today = LocalDate.now();
@@ -32,13 +34,22 @@ public class SchedulerService {
             if (task.getDeadline() != null && task.getDeadline().isBefore(today) && !task.isCompleted()) {
                 Space space = spaceRepository.findById(task.getSpaceId()).orElse(null);
                 User user = userService.getUserFromSpace(space).orElse(null);
-                
                 if(!user.isStreakFreezeActive()){
                     user.setStreakBroken(true);
                     user.setStreak(0);
                 }
 
-                task.setCompleted(false);
+                if (task.getFrequency() == Frequency.NONE) {
+                    // Task aus Space entfernen
+                    space.getTaskIds().remove(task.getId());
+                    spaceRepository.save(space);
+
+                    // Task löschen
+                    taskRepository.delete(task);
+                }else{
+                    task.setCompletions(new ArrayList<>());
+                    task.setCompleted(false);
+                }
 
             }
         }
