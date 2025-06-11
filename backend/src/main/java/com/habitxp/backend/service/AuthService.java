@@ -48,7 +48,7 @@ public class AuthService {
                 .xp(0)
                 .xpGoal(100)
                 .coins(0)
-                .level(1)
+                .level(0)
                 .health(100)
                 .maxHealth(100)
                 .currentXP(0)

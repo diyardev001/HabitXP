@@ -62,6 +62,22 @@ public class User {
         this.spaceIds.remove(spaceId);
     }
 
+    public void addXP(int baseXP) {
+        int gainedXP = baseXP * xpFactor;
+        this.xp += gainedXP;
+
+        int oldLevel = this.level;
+        int newLevel = calculateLevel();
+        this.level = newLevel;
+
+        calculateCurrentXP();
+        calculateXPGoal();
+
+        if (newLevel > oldLevel) {
+            levelup(true, false);
+        }
+    }
+
     public int calculateLevel() {
         int tempLevel = 0;
         double xpSum = 0;
@@ -69,7 +85,6 @@ public class User {
             xpSum += Math.round(100 * Math.pow(1.2, tempLevel));
             tempLevel++;
         }
-        this.level = tempLevel;
         return tempLevel;
     }
 
@@ -89,7 +104,7 @@ public class User {
         if (xpFactorUntil != null && Instant.now().isAfter(xpFactorUntil)) {
             xpFactor = 1;
             xpFactorUntil = null;
-            xpBonusActive=false;
+            xpBonusActive = false;
         }
     }
 
@@ -100,27 +115,28 @@ public class User {
         }
     }
 
-    public void levelup(boolean health, boolean taskL){
-        if(health){
-            this.health+=2;
-        }else if(taskL){
-            taskLimit+=1;
-        }
-    }
-    
-    public void coinPenalty(){
-        if (coins>=5) {
-            coins-=5;
-        }else{
-            coins=0;
+    public void levelup(boolean health, boolean taskL) {
+        if (health) {
+            this.maxHealth += 2;
+            this.health = maxHealth;
+        } else if (taskL) {
+            taskLimit += 1;
         }
     }
 
-    public void healthpenalty(){
-        if (health>=2) {
-            health-=2;
-        }else{
-            health=0;
+    public void coinPenalty() {
+        if (coins >= 5) {
+            coins -= 5;
+        } else {
+            coins = 0;
+        }
+    }
+
+    public void healthpenalty() {
+        if (health >= 2) {
+            health -= 2;
+        } else {
+            health = 0;
         }
     }
 
