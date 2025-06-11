@@ -137,7 +137,8 @@ const styles = StyleSheet.create({
     filterContainer: {
         flexDirection: 'row',
         alignItems: "center",
-        gap: 10
+        gap: 10,
+        paddingBottom: 16
     },
     optionContainer: {
         justifyContent: 'center',
