@@ -1,5 +1,6 @@
 package com.habitxp.backend.model;
 
+import jakarta.annotation.Nonnull;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
@@ -33,7 +34,7 @@ public class Task {
     @NotNull
     private String duration;
     private LocalDate Deadline;
-    @NotNull
+    @Nonnull
     private Integer times; // Anzahl Wiederholungen pro Zeitintervall
     private boolean isCompleted;
 

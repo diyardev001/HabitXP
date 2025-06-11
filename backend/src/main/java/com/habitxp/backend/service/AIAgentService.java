@@ -81,12 +81,12 @@ public class AIAgentService {
             - Die Anzahl der Wiederholungen
             - Den möglichen Nutzen für persönliche Entwicklung, Gesundheit oder Produktivität
 
-            Gib **ausschließlich** eine ganze Zahl zwischen 1 und 100 als Antwort zurück.
+            Gib **ausschließlich** eine ganze Zahl zwischen 0 und 100 als Antwort zurück.
 
             --- Aufgabe ---
             Titel: %s
             Dauer: %s
-            Wiederholungen: %s
+            Wiederholungen pro Tag: %s
             ----------------
             """,
             type,
