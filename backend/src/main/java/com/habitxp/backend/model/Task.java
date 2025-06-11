@@ -42,7 +42,6 @@ public class Task {
     private int rewardCoins;
     @NotNull
     private Frequency frequency;
-    
 
     private String spaceId;
     private String colorKey;
@@ -90,22 +89,7 @@ public class Task {
             this.isCompleted = true;
             //Updates
             user.setStreakBroken(false);
-
-            //Belohnung
-            user.setCoins(user.getCoins() + rewardCoins);
-            user.xpFactorReset();
-            user.setXp(user.getXp() + rewardXP * user.getXpFactor());
-
-            //Überprüfungen
-            int level=user.getLevel();
-            user.calculateCurrentXP();
-                //LevelUP
-            if(level<user.calculateLevel()){
-                user.levelup(true,false);
-            }
-            user.calculateXPGoal();
         }
-
 
         return true;
     }
@@ -124,8 +108,6 @@ public class Task {
         if (isCompleted) {
             return 0;
         }
-
-        LocalDate now = LocalDate.now();
 
         List<Completion> currentPeriodCompletions = completions.stream()
                 .filter(c -> isInCurrentPeriod(c.getTimestamp().toLocalDate()))

@@ -11,22 +11,34 @@ import PrimaryButton from "@/components/PrimaryButton";
 import {ROUTES} from "@/routes";
 import InputField from "@/components/InputField";
 import useTheme from "@/hooks/useTheme";
+import {isNotEmpty} from "@/utils/validators";
 
 export default function Login() {
     const {login} = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
+    const [errors, setErrors] = useState<{ email?: string; password?: string; server?: string }>({});
     const [loading, setLoading] = useState(false);
     const colors = useTheme();
 
     const handleLogin = async () => {
+        const newErrors: typeof errors = {};
+
+        if (!isNotEmpty(email)) newErrors.email = "Bitte Email eingeben";
+        if (!isNotEmpty(password)) newErrors.password = "Bitte Passwort eingeben";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
+            return;
+        }
+
+        setErrors({});
+        setLoading(true);
+
         try {
-            setLoading(true);
-            setError("");
             await login(email, password);
         } catch (err: any) {
-            setError(err.response?.data?.message || "Login fehlgeschlagen");
+            setErrors({server: err.response?.data?.message || "Login fehlgeschlagen"});
         } finally {
             setLoading(false);
         }
@@ -50,6 +62,7 @@ export default function Login() {
                         value={email}
                         onChangeText={setEmail}
                         placeholder={"Email"}
+                        error={errors.email}
                     />
                     <InputField
                         label={"Passwort"}
@@ -58,9 +71,10 @@ export default function Login() {
                         onChangeText={setPassword}
                         placeholder={"Passwort"}
                         secureTextEntry={true}
+                        error={errors.password}
                     />
 
-                    {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
+                    {errors.server && <NormalText style={styles.serverError}>{errors.server}</NormalText>}
 
                     <PrimaryButton title={"Einloggen"} onPress={handleLogin} loading={loading}/>
 
@@ -84,7 +98,7 @@ const styles = StyleSheet.create({
     title: {
         marginBottom: 24,
     },
-    error: {color: "red", marginBottom: 12},
+    serverError: {color: "red", marginBottom: 12},
     orContainer: {
         flexDirection: "row",
         alignItems: "center",

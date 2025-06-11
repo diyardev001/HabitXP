@@ -9,7 +9,7 @@ export default function List() {
     const colors = useTheme();
     const [habits, setHabits] = useState<Task[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
-    const options = ['Heute', 'Woche', 'Monat', 'Alle'];
+    const options = ['Alle', 'Heute', 'Woche', 'Monat'];
     let hasShownCompletedDivider = false;
 
     const frequencyFilters: { [key: number]: ((task: Task) => boolean) | undefined } = {
@@ -137,7 +137,8 @@ const styles = StyleSheet.create({
     filterContainer: {
         flexDirection: 'row',
         alignItems: "center",
-        gap: 10
+        gap: 10,
+        paddingBottom: 16
     },
     optionContainer: {
         justifyContent: 'center',
@@ -161,7 +162,7 @@ const styles = StyleSheet.create({
     dividerContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginVertical: 16,
+        marginBottom: 16,
         marginHorizontal: 16,
     },
     line: {
