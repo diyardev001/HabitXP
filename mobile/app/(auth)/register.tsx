@@ -11,51 +11,49 @@ import {ROUTES} from "@/routes";
 import InputField from "@/components/InputField";
 import useTheme from "@/hooks/useTheme";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
+import {isNotEmpty, isSecurePassword, isValidEmail} from "@/utils/validators";
 
 export default function RegisterScreen() {
     const {register} = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
+    const [repeatPassword, setRepeatPassword] = useState("");
     const [firstName, setFirstName] = useState("");
     const [lastName, setLastName] = useState("");
     const [username, setUsername] = useState("");
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState("");
-    const [repeatPassword, setRepeatPassword] = useState("");
+    const [errors, setErrors] = useState<{ [key: string]: string }>({});
 
     const colors = useTheme();
 
-    const isPasswordSecure = (password: string) => {
-        const regex = /^(?=.*[A-Z]).{8,}$/;
-        return regex.test(password);
-    };
-
     const handleRegister = async () => {
-        if (!email || !password) {
-            setError("Bitte fülle alle Felder aus");
-            return;
-        }
-        if (password !== repeatPassword) {
-            setError("Passwörter stimmen nicht überein");
-            return;
-        }
-        if (!isPasswordSecure(password)) {
-            setError("Passwort muss mindestens 8 Zeichen lang sein und mindestens einen Großbuchstaben enthalten.");
+        const newErrors: typeof errors = {};
+
+        if (!isNotEmpty(firstName)) newErrors.firstName = "Bitte Vorname eingeben";
+        if (!isNotEmpty(lastName)) newErrors.lastName = "Bitte Nachname eingeben";
+        if (!isNotEmpty(username)) newErrors.username = "Bitte Benutzernamen eingeben";
+        if (!isNotEmpty(email)) newErrors.email = "Bitte Email eingeben";
+        if (!isValidEmail(email)) newErrors.email = "Bitte eine gültige Email-Adresse eingeben";
+        if (!isNotEmpty(password)) newErrors.password = "Bitte Passwort eingeben";
+        if (!isSecurePassword(password)) newErrors.password = "Mind. 8 Zeichen und 1 Großbuchstabe";
+        if (password !== repeatPassword) newErrors.repeatPassword = "Passwörter stimmen nicht überein";
+
+        if (Object.keys(newErrors).length > 0) {
+            setErrors(newErrors);
             return;
         }
 
-        setError("");
+        setErrors({});
         setLoading(true);
+
         try {
             await register({email, password, username, firstName, lastName});
         } catch (e: any) {
             const message = e?.response?.data?.message ?? e?.response?.data?.error;
-            if (message) {
-                setError(message);
-            } else {
-                setError("Etwas ist schiefgelaufen – versuche es erneut");
-            }
+            setErrors({
+                server: message || "Etwas ist schiefgelaufen – versuche es erneut"
+            });
         } finally {
             setLoading(false);
         }
@@ -80,6 +78,7 @@ export default function RegisterScreen() {
                             onChangeText={setFirstName}
                             placeholder={"Vorname"}
                             style={{flex: 1}}
+                            error={errors.firstName}
                         />
                         <InputField
                             label={"Nachname"}
@@ -87,6 +86,7 @@ export default function RegisterScreen() {
                             onChangeText={setLastName}
                             placeholder={"Nachname"}
                             style={{flex: 1}}
+                            error={errors.lastName}
                         />
                     </View>
 
@@ -95,12 +95,14 @@ export default function RegisterScreen() {
                         value={email}
                         onChangeText={setEmail}
                         placeholder={"Email"}
+                        error={errors.email}
                     />
                     <InputField
                         label={"Benutzername"}
                         value={username}
                         onChangeText={setUsername}
                         placeholder={"Benutzername"}
+                        error={errors.username}
                     />
                     <InputField
                         label={"Passwort"}
@@ -108,15 +110,17 @@ export default function RegisterScreen() {
                         onChangeText={setPassword}
                         placeholder={"Passwort"}
                         secureTextEntry={true}
+                        error={errors.password}
                     />
                     <InputField
                         value={repeatPassword}
                         onChangeText={setRepeatPassword}
                         placeholder={"Passwort wiederholen"}
                         secureTextEntry={true}
+                        error={errors.repeatPassword}
                     />
 
-                    {error ? <NormalText style={styles.error}>{error}</NormalText> : null}
+                    {errors.server && <NormalText style={styles.serverError}>{errors.server}</NormalText>}
 
                     <PrimaryButton title={"Registrieren"} loading={loading} onPress={handleRegister}/>
 
@@ -141,7 +145,7 @@ const styles = StyleSheet.create({
         justifyContent: "space-between",
         gap: 16
     },
-    error: {color: "red", marginBottom: 12},
+    serverError: {color: "red", marginBottom: 12},
     orContainer: {
         flexDirection: "row",
         alignItems: "center",
