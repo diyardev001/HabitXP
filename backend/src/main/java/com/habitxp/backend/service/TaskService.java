@@ -28,7 +28,12 @@ public class TaskService {
     private final AIAgentService aiagent;
 
     public List<Task> getTasksByUser(String userId) {
-        return taskRepository.findByUserId(userId);
+        List<Task> tasks = taskRepository.findByUserId(userId);
+        tasks.forEach(task -> {
+            task.updateCompletionStatus();
+            taskRepository.save(task);
+        });
+        return tasks;
     }
 
     public Task getTaskById(String id) {
