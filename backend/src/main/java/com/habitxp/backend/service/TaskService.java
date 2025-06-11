@@ -71,7 +71,7 @@ public class TaskService {
         taskRepository.save(task);
 
         if (success) {
-            applyRewardsToUser(user, task.getRewardXP(), task.getRewardCoins());
+            applyRewardsToUser(user, task);
         }
 
         return new CompletionResponse(
@@ -99,19 +99,10 @@ public class TaskService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    private void applyRewardsToUser(User user, int rewardXP, int rewardCoins) {
-        final int rewardHealth = 10; // TODO: durch KI bestimmen?
-
-        user.setXp(user.getXp() + rewardXP);
-        user.setCoins(user.getCoins() + rewardCoins);
-
-        int newHealth = user.getHealth() + rewardHealth;
-        user.setHealth(Math.min(newHealth, user.getMaxHealth()));
-
-        user.calculateLevel();
-        user.calculateCurrentXP();
-        user.calculateXPGoal();
-
+    private void applyRewardsToUser(User user, Task task) {
+        user.addXP(task.getRewardXP());
+        user.setCoins(user.getCoins() + task.getRewardCoins());
+        user.xpFactorReset();
         userRepository.save(user);
     }
 }
