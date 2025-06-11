@@ -12,6 +12,7 @@ type Props = {
     secureTextEntry?: boolean;
     style?: object;
     keyboardType?: KeyboardTypeOptions;
+    error?: string;
 };
 
 export default function InputField({
@@ -22,7 +23,8 @@ export default function InputField({
                                        placeholder,
                                        secureTextEntry,
                                        style,
-                                       keyboardType
+                                       keyboardType,
+                                       error
                                    }: Readonly<Props>) {
     const colors = useTheme();
     const [isSecure, setIsSecure] = useState(!!secureTextEntry);
@@ -63,6 +65,8 @@ export default function InputField({
                     />
                 )}
             </View>
+
+            {error && <Text style={styles.errorText}>{error}</Text>}
         </View>
     );
 }
@@ -79,4 +83,10 @@ const styles = StyleSheet.create({
     },
     icon: {marginRight: 10},
     input: {flex: 1, fontSize: 16},
+    errorText: {
+        color: "red",
+        fontSize: 14,
+        marginTop: 4,
+        marginLeft: 4
+    }
 });
