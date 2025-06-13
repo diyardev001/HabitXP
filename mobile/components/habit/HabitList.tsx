@@ -1,13 +1,13 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {FlatList, LayoutAnimation, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
+import React, {useMemo, useState} from 'react';
+import {FlatList, ScrollView, StyleSheet, Text, TouchableOpacity, View,} from 'react-native';
 import Card from '../habit/Card';
-import {getTasks} from "@/services/taskService";
 import {Task} from "@/types/task";
 import useTheme from "@/hooks/useTheme";
+import {useTasks} from "@/hooks/useTasks";
 
 export default function List() {
     const colors = useTheme();
-    const [habits, setHabits] = useState<Task[]>([]);
+    const {data: habits = [], isLoading, isError} = useTasks();
     const [selectedIndex, setSelectedIndex] = useState(0);
     const options = ['Alle', 'Heute', 'Woche', 'Monat'];
     let hasShownCompletedDivider = false;
@@ -19,24 +19,13 @@ export default function List() {
         3: (task: Task) => task.frequency === 'MONTHLY',
     };
 
-    useEffect(() => {
-        getTasks()
-            .then((data) => {
-                LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                setHabits(data);
-            })
-            .catch((error) => {
-                console.error("Fehler beim Laden der Habits:", error);
-            });
-    }, []);
-
     const filteredData = useMemo(() => {
         const filterByFrequency = frequencyFilters[selectedIndex];
         const filtered = filterByFrequency ? habits.filter(filterByFrequency) : habits;
 
         return [...filtered].sort((a, b) => {
-            if (a.completed !== b.completed) {
-                return a.completed ? 1 : -1;
+            if (a.isCompleted !== b.isCompleted) {
+                return a.isCompleted ? 1 : -1;
             }
             const titleComparison = a.title.localeCompare(b.title);
             if (titleComparison !== 0) {
@@ -53,12 +42,9 @@ export default function List() {
         });
     }, [selectedIndex, habits]);
 
-    const handleHabitComplete = (id: string) => {
-        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-        setHabits((prev) =>
-            prev.map((h) => (h.id === id ? {...h, completed: true} : h))
-        );
-    };
+    if (isLoading) return <Text>Loading...</Text>;
+    if (isError) return <Text>Fehler beim Laden der Aufgaben</Text>;
+
 
     return (
         <View style={{flex: 1}}>
@@ -99,7 +85,7 @@ export default function List() {
                     const durationUnit = match?.[2] === "h" ? "HOURS" : "MINUTES";
 
                     let showCompletedDivider = false;
-                    if (item.completed && !hasShownCompletedDivider) {
+                    if (item.isCompleted && !hasShownCompletedDivider) {
                         showCompletedDivider = true;
                         hasShownCompletedDivider = true;
                     }
@@ -121,9 +107,9 @@ export default function List() {
                                 durationUnit={durationUnit}
                                 times={item.times}
                                 frequency={item.frequency}
-                                done={item.completed}
+                                done={item.isCompleted}
                                 colorKey={item.colorKey}
-                                onComplete={() => handleHabitComplete(item.id)}
+                                completionsCount={item.completionsCount}
                             />
                         </>
                     );
