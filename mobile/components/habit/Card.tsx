@@ -1,7 +1,7 @@
 import {Ionicons} from '@expo/vector-icons';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {completeTask, getTaskStatus} from "@/services/taskService";
 import {useState} from "react";
+import {completeTask} from "@/services/taskService";
 import {Colors} from "@/constants/Colors";
 import RewardModal from "@/components/RewardModal";
 import {RewardItem} from "@/types/reward";
@@ -16,7 +16,7 @@ interface CardProps {
     frequency: string;
     done: boolean;
     colorKey: keyof typeof Colors.habit;
-    onComplete: () => void;
+    completionsCount: number;
 }
 
 const frequencyMap: Record<string, string> = {
@@ -34,18 +34,17 @@ export default function Card({
                                  frequency,
                                  done,
                                  colorKey,
-                                 onComplete
+                                 completionsCount
                              }: Readonly<CardProps>) {
     const [showModal, setShowModal] = useState(false);
     const [rewards, setRewards] = useState<RewardItem[]>([]);
 
     const colorSet = Colors.habit[colorKey];
-    const backgroundColor = isCompleted ? colorSet.completed : colorSet.bg;
-    const accentColor = isCompleted ? colorSet.completedAccent : colorSet.ac;
-
+    const backgroundColor = done ? colorSet.completed : colorSet.bg;
+    const accentColor = done ? colorSet.completedAccent : colorSet.ac;
 
     const handleComplete = async () => {
-        if (isCompleted) return;
+        if (done) return;
 
         try {
             const response = await completeTask(id);
@@ -57,10 +56,7 @@ export default function Card({
                     {label: "Coins", value: response.rewardCoins},
                 ]);
                 setShowModal(true);
-                onComplete();
             }
-            setIsCompleted(response.completed);
-            setRemaining(response.remaining);
         } catch (error) {
             console.error("Fehler beim Abschließen des Tasks:", error);
         }
@@ -96,7 +92,7 @@ export default function Card({
                 }}
             >
                 <Text style={styles.deadline}>
-                    {frequency !== "NONE" ? `${times}x ${frequencyMap[frequency]} (${times - remaining}/${times})` : ""}
+                    {frequency !== "NONE" ? `${times}x ${frequencyMap[frequency]} (${completionsCount}/${times})` : ""}
                 </Text>
 
                 <TouchableOpacity onPress={handleComplete}>
@@ -104,7 +100,7 @@ export default function Card({
                         name={"checkmark-circle"}
                         size={50}
                         color={"white"}
-                        style={{opacity: isCompleted ? 0.4 : 1}}
+                        style={{opacity: done ? 0.4 : 1}}
                     />
                 </TouchableOpacity>
             </View>
@@ -115,6 +111,7 @@ export default function Card({
                 title={"Habit abgeschlossen!"}
                 description={"Du hast Belohnungen erhalten:"}
                 rewards={rewards}
+                animationType={"confetti"}
             />
         </View>
     );
