@@ -70,9 +70,7 @@ export default function CreateHabitScreen() {
         };
 
         try {
-            const createdHabit = await createTask(habit);
-
-            console.log("Habit erstellt:", createdHabit);
+            await createTask(habit);
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);

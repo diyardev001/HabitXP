@@ -1,7 +1,7 @@
 import React, {createContext, useContext, useEffect, useMemo, useState} from "react";
 import * as SecureStore from 'expo-secure-store';
 import {router, useSegments} from "expo-router";
-import api, {setAccessToken} from "@/services/api";
+import api from "@/services/api";
 import {AuthContextType, RegisterRequest, User} from "@/types/auth";
 import {ROUTES} from "@/routes";
 
@@ -9,31 +9,31 @@ const AuthContext = createContext<AuthContextType | null>(null);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}) => {
     const [user, setUser] = useState<User | null>(null);
-    const [token, setTokenState] = useState<string | null>(null);
+    const [token, setToken] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(true);
     const segments = useSegments();
 
-    const setToken = (newToken: string | null) => {
-        setTokenState(newToken);
-        setAccessToken(newToken); // <-- Immer Memory aktualisieren
+    const loadSession = async () => {
+        try {
+            const storedToken = await SecureStore.getItemAsync('accessToken');
+            if (!storedToken) {
+                console.log("Kein gespeichertes Token, vermutlich noch nicht eingeloggt.")
+                await logout();
+                return;
+            }
+
+            setToken(storedToken);
+            const res = await api.get('/user/profile');
+            setUser(res.data);
+        } catch (err: any) {
+            console.log("Session-Check fehlgeschlagen", err.message);
+            await logout()
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     useEffect(() => {
-        const loadSession = async () => {
-            try {
-                const storedToken = await SecureStore.getItemAsync('accessToken');
-                if (storedToken) {
-                    setToken(storedToken);
-                    const res = await api.get('/user/profile');
-                    setUser(res.data);
-                }
-            } catch (err: any) {
-                console.log("Session-Check fehlgeschlagen", err.message);
-                await logout()
-            } finally {
-                setIsLoading(false);
-            }
-        };
         loadSession();
     }, []);
 
@@ -58,10 +58,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
                 SecureStore.setItemAsync('accessToken', accessToken),
             ]);
 
-            setToken(accessToken);
-
-            const profile = await api.get("/user/profile");
-            setUser(profile.data);
+            await loadSession();
         } catch (error: any) {
             console.log("Login fehlgeschlagen:", error.response?.data || error.message);
             throw error;
@@ -69,16 +66,21 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
     };
 
     const register = async (data: RegisterRequest) => {
-        const res = await api.post('/auth/register', data);
-        const {accessToken, refreshToken} = res.data;
+        try {
+            const res = await api.post('/auth/register', data);
+            const {accessToken, refreshToken} = res.data;
 
-        await SecureStore.setItemAsync('accessToken', accessToken);
-        await SecureStore.setItemAsync('refreshToken', refreshToken);
+            await Promise.all([
+                SecureStore.setItemAsync('accessToken', accessToken),
+                SecureStore.setItemAsync('refreshToken', refreshToken),
+            ]);
 
-        setToken(accessToken);
-        const profile = await api.get("/user/profile");
-        setUser(profile.data);
-        router.replace(ROUTES.DASHBOARD);
+            await loadSession();
+            router.replace(ROUTES.DASHBOARD);
+        } catch (error: any) {
+            console.log("Registrierung fehlgeschlagen:", error.response?.data || error.message);
+            throw error;
+        }
     };
 
     const logout = async () => {
