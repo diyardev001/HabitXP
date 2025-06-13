@@ -1,10 +1,11 @@
 import {Ionicons} from '@expo/vector-icons';
 import {StyleSheet, Text, TouchableOpacity, View} from 'react-native';
-import {useEffect, useState} from "react";
 import {completeTask, getTaskStatus} from "@/services/taskService";
+import {useState} from "react";
 import {Colors} from "@/constants/Colors";
 import RewardModal from "@/components/RewardModal";
 import {RewardItem} from "@/types/reward";
+import {queryClient} from '@/lib/queryClient';
 
 interface CardProps {
     id: string;
@@ -35,8 +36,6 @@ export default function Card({
                                  colorKey,
                                  onComplete
                              }: Readonly<CardProps>) {
-    const [isCompleted, setIsCompleted] = useState(done);
-    const [remaining, setRemaining] = useState(times);
     const [showModal, setShowModal] = useState(false);
     const [rewards, setRewards] = useState<RewardItem[]>([]);
 
@@ -44,19 +43,6 @@ export default function Card({
     const backgroundColor = isCompleted ? colorSet.completed : colorSet.bg;
     const accentColor = isCompleted ? colorSet.completedAccent : colorSet.ac;
 
-    useEffect(() => {
-        async function fetchStatus() {
-            try {
-                const status = await getTaskStatus(id);
-                setIsCompleted(status.completed);
-                setRemaining(status.remaining);
-            } catch (error) {
-                console.error("Fehler beim Laden des Status:", error);
-            }
-        }
-
-        fetchStatus();
-    }, [id]);
 
     const handleComplete = async () => {
         if (isCompleted) return;
@@ -64,6 +50,8 @@ export default function Card({
         try {
             const response = await completeTask(id);
             if (response.completed) {
+                await queryClient.invalidateQueries({queryKey: ['tasks']});
+                await queryClient.invalidateQueries({queryKey: ['userData']});
                 setRewards([
                     {label: "XP", value: response.rewardXP},
                     {label: "Coins", value: response.rewardCoins},

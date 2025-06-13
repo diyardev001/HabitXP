@@ -12,6 +12,7 @@ import {createTask} from "@/services/taskService";
 import DropdownSelect from "@/components/DropdownSelect";
 import {Colors} from "@/constants/Colors";
 import {NewTask} from "@/types/task";
+import {queryClient} from "@/lib/queryClient";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -64,13 +65,13 @@ export default function CreateHabitScreen() {
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             frequency,
             times: frequency !== "NONE" ? parseInt(times) : 0,
-            completed: false,
             spaceId: space,
             colorKey: selectedColorKey,
         };
 
         try {
             await createTask(habit);
+            await queryClient.invalidateQueries({queryKey: ['tasks']});
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);
