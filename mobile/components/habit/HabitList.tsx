@@ -13,10 +13,10 @@ export default function List() {
     let hasShownCompletedDivider = false;
 
     const frequencyFilters: { [key: number]: ((task: Task) => boolean) | undefined } = {
-        0: (task: Task) => task.frequency === 'DAILY',
-        1: (task: Task) => task.frequency === 'WEEKLY',
-        2: (task: Task) => task.frequency === 'MONTHLY',
-        3: undefined,
+        0: undefined,
+        1: (task: Task) => task.frequency === 'DAILY',
+        2: (task: Task) => task.frequency === 'WEEKLY',
+        3: (task: Task) => task.frequency === 'MONTHLY',
     };
 
     useEffect(() => {
