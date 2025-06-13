@@ -6,9 +6,19 @@ export type Task = {
     duration: string;
     times: number;
     frequency: string;
-    completed: boolean;
+    colorKey: keyof typeof Colors.habit;
+    spaceId: string;
+    completions: string[];
+
+    completionsCount: number;
+    isCompleted: boolean;
+}
+
+export type NewTask = {
+    title: string;
+    duration: string;
+    frequency: string;
+    times: number;
     colorKey: keyof typeof Colors.habit;
     spaceId: string;
 }
-
-export type NewTask = Omit<Task, 'id'>;
