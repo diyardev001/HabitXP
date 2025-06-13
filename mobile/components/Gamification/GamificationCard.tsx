@@ -1,5 +1,7 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
+import {UserData} from "@/types/user";
+import {Ionicons} from "@expo/vector-icons";
 import ProgressBar from "@/components/Gamification/ProgressBar";
 import StatIndicator from "@/components/Gamification/StatIndicator";
 import RewardModal from "@/components/RewardModal";
@@ -8,28 +10,20 @@ const STREAK_MILESTONES = [5, 10, 25, 50, 100];
 
 const GAMIFICATION_ICONS = {
     diamond: require('@/assets/images/icons/gamification/diamand.png'),
-    xp: require('@/assets/images/icons/gamification/xp.png'),
-    health: require('@/assets/images/icons/gamification/health.png'),
-    coin: require('@/assets/images/icons/gamification/coin.png'),
+    coin: require("@/assets/images/icons/gamification/coin.png")
 };
 
 interface GamificationCardProps {
-    hp: number;
-    xp: number;
-    maxHp?: number;
-    maxXp?: number;
-    lvl: number;
-    coins?: number;
+    userData: UserData;
 }
 
 const GamificationCard: React.FC<GamificationCardProps> = ({
-                                                               hp = 29,
-                                                               maxHp = 50,
-                                                               xp = 12,
-                                                               maxXp = 25,
-                                                               lvl = 1,
-                                                               coins = 202,
+                                                               userData
                                                            }) => {
+    const {
+        health, maxHealth, currentXP, xpGoal, level, coins, streak, avatars
+    } = userData;
+    const avatar = avatars.length > 0 ? avatars[0] : 'diamond';
     const [showStreakModal, setShowStreakModal] = useState(false);
     const [alreadyShown, setAlreadyShown] = useState(false);
 
@@ -41,12 +35,13 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
     }, [streak, alreadyShown]);
 
     return (
-        <View style={styles.container}>
-            <View style={styles.row}>
-                {/* Icon & Level */}
-                <View style={styles.iconLevelBox}>
-                    <Image source={GAMIFICATION_ICONS.diamond} style={styles.diamond}/>
-                </View>
+        <>
+            <View style={styles.container}>
+                <View style={styles.row}>
+                    {/* Avatar */}
+                    <View style={styles.avatarBox}>
+                        <Image source={GAMIFICATION_ICONS[avatar as keyof typeof GAMIFICATION_ICONS]}
+                               style={styles.diamond}/>
                     </View>
 
                     {/* Bars & Stats */}
@@ -100,6 +95,7 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
 
 const styles = StyleSheet.create({
     container: {
+        marginTop: 16,
         paddingHorizontal: 12,
         paddingTop: 12,
         paddingBottom: 26,
@@ -110,23 +106,17 @@ const styles = StyleSheet.create({
         width: '100%',
         paddingBottom: 12,
     },
-    iconLevelBox: {
+    avatarBox: {
         backgroundColor: '#221a3f',
-        padding: 40,
+        padding: 30,
         alignItems: 'center',
-        marginRight: 30,
+        marginRight: 15,
     },
     diamond: {
         width: 60,
         height: 60,
         resizeMode: 'contain',
         marginBottom: 2,
-    },
-    lvlText: {
-        color: 'white',
-        fontSize: 14,
-        marginTop: 2,
-        textAlign: 'center',
     },
     barsBox: {
         flex: 1,
@@ -176,6 +166,11 @@ const styles = StyleSheet.create({
         justifyContent: 'space-between',
         marginHorizontal: 4,
     },
+    lvlText: {
+        color: "white",
+        fontSize: 18,
+        marginTop: 2,
+        textAlign: "center"
     },
     rightStatsBox: {
         flexDirection: "row",
