@@ -1,7 +1,8 @@
-import {Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Animated, Dimensions, Modal, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import ConfettiCannon from "react-native-confetti-cannon";
 import {Colors} from "@/constants/Colors";
-import {useEffect} from "react";
+import {useEffect, useRef} from "react";
+import {Ionicons} from "@expo/vector-icons";
 
 const {width, height} = Dimensions.get("window");
 
@@ -16,6 +17,7 @@ interface RewardModalProps {
     title?: string;
     description?: string;
     rewards?: RewardItem[];
+    animationType?: 'confetti' | 'flame' | 'none';
 }
 
 export default function RewardModal({
@@ -24,26 +26,72 @@ export default function RewardModal({
                                         title,
                                         description = 'Du hast folgendes erhalten:',
                                         rewards = [],
+                                        animationType = 'none'
                                     }: Readonly<RewardModalProps>) {
     const theme = Colors["dark"];
+    const flameAnimations = useRef<Animated.Value[]>([]);
 
     useEffect(() => {
         let timer: NodeJS.Timeout;
 
         if (visible) {
+            flameAnimations.current = [...Array(10)].map(() => new Animated.Value(0));
+
+            if (animationType === "flame") {
+                flameAnimations.current.forEach((anim, i) => {
+                    Animated.timing(anim, {
+                        toValue: 1,
+                        duration: 1500 + i * 100,
+                        useNativeDriver: true,
+                    }).start();
+                });
+            }
+
             timer = setTimeout(() => {
                 onClose();
             }, 4000); // Modal wird nach 4 Sekunden geschlossen
         }
 
         return () => clearTimeout(timer);
-    }, [visible, onClose]);
+    }, [visible, onClose, animationType]);
+
+    const renderFlames = () => {
+        return flameAnimations.current.map((anim, i) => {
+            const translateY = anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [0, -100 - Math.random() * 50],
+            });
+
+            const opacity = anim.interpolate({
+                inputRange: [0, 1],
+                outputRange: [1, 0],
+            });
+
+            const translateX = (Math.random() - 0.5) * 150;
+
+            return (
+                <Animated.View
+                    key={i}
+                    style={{
+                        position: "absolute",
+                        top: height / 2,
+                        left: width / 2,
+                        transform: [
+                            {translateX: translateX},
+                            {translateY: translateY},
+                        ],
+                        opacity: opacity,
+                    }}
+                >
+                    <Ionicons name="flame" size={40} color="#FF5722"/>
+                </Animated.View>
+            );
+        });
+    };
 
     return (
         <Modal transparent={true} animationType="fade" visible={visible}>
             <View style={styles.modalBackground}>
-
-
                 <View style={[styles.modalContent, {backgroundColor: theme.background}]}>
                     <Text style={[styles.modalTitle, {color: theme.title}]}>{title}</Text>
                     <Text style={[styles.modalText, {color: theme.subtitle}]}>{description}</Text>
@@ -60,13 +108,16 @@ export default function RewardModal({
                     </TouchableOpacity>
                 </View>
 
-                <ConfettiCannon
-                    count={150}
-                    origin={{x: width / 2, y: height}}
-                    explosionSpeed={400}
-                    fallSpeed={3000}
-                    fadeOut
-                />
+                {animationType === 'flame' && renderFlames()}
+                {animationType === 'confetti' && (
+                    <ConfettiCannon
+                        count={150}
+                        origin={{x: width / 2, y: height}}
+                        explosionSpeed={400}
+                        fallSpeed={3000}
+                        fadeOut
+                    />
+                )}
             </View>
         </Modal>
     );
