@@ -1,5 +1,10 @@
 import React from 'react';
 import {Image, StyleSheet, Text, View} from 'react-native';
+import ProgressBar from "@/components/Gamification/ProgressBar";
+import StatIndicator from "@/components/Gamification/StatIndicator";
+import RewardModal from "@/components/RewardModal";
+
+const STREAK_MILESTONES = [5, 10, 25, 50, 100];
 
 const GAMIFICATION_ICONS = {
     diamond: require('@/assets/images/icons/gamification/diamand.png'),
@@ -7,22 +12,6 @@ const GAMIFICATION_ICONS = {
     health: require('@/assets/images/icons/gamification/health.png'),
     coin: require('@/assets/images/icons/gamification/coin.png'),
 };
-
-interface ProgressBarProps {
-    percentage: number;
-    color: string;
-}
-
-const ProgressBar: React.FC<ProgressBarProps> = ({percentage, color}) => (
-    <View style={styles.progressBarContainer}>
-        <View
-            style={[
-                styles.progressBar,
-                {width: `${percentage}%`, backgroundColor: color},
-            ]}
-        />
-    </View>
-);
 
 interface GamificationCardProps {
     hp: number;
@@ -41,6 +30,16 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
                                                                lvl = 1,
                                                                coins = 202,
                                                            }) => {
+    const [showStreakModal, setShowStreakModal] = useState(false);
+    const [alreadyShown, setAlreadyShown] = useState(false);
+
+    useEffect(() => {
+        if (STREAK_MILESTONES.includes(streak) && !alreadyShown) {
+            setShowStreakModal(true);
+            setAlreadyShown(true);
+        }
+    }, [streak, alreadyShown]);
+
     return (
         <View style={styles.container}>
             <View style={styles.row}>
@@ -48,65 +47,54 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
                 <View style={styles.iconLevelBox}>
                     <Image source={GAMIFICATION_ICONS.diamond} style={styles.diamond}/>
                 </View>
-                {/* Bars & Stats */}
-                <View style={styles.barsBox}>
-                    {/* HP Bar */}
-                    <View style={styles.barRow}>
-                        <Image source={GAMIFICATION_ICONS.health} style={styles.statIcon}/>
-                        <View style={styles.barCol}>
-                            <View style={styles.progressBarContainer}>
-                                <View
-                                    style={[
-                                        styles.progressBar,
-                                        {
-                                            width: `${(hp / maxHp) * 100}%`,
-                                            backgroundColor: '#FF6B6B',
-                                        },
-                                    ]}
-                                />
-                            </View>
-                            <View style={styles.barLabelRow}>
-                                <Text style={[styles.barLabel, {marginRight: '75%'}]}>
-                                    {hp}/{maxHp}
-                                </Text>
-                                <Text style={styles.barLabelUnit}>LP</Text>
-                            </View>
-                        </View>
                     </View>
-                    {/* XP Bar */}
-                    <View style={styles.barRow}>
-                        <Image source={GAMIFICATION_ICONS.xp} style={styles.statIcon}/>
-                        <View style={styles.barCol}>
-                            <View style={[styles.progressBarContainer, {marginTop: 8}]}>
-                                <View
-                                    style={[
-                                        styles.progressBar,
-                                        {
-                                            width: `${(xp / maxXp) * 100}%`,
-                                            backgroundColor: '#FFD93D',
-                                        },
-                                    ]}
-                                />
-                            </View>
-                            <View style={styles.barLabelRow}>
-                                <Text style={[styles.barLabel, {marginRight: '75%'}]}>
-                                    {xp}/{maxXp}
-                                </Text>
-                                <Text style={styles.barLabelUnit}>EP</Text>
-                            </View>
-                        </View>
+
+                    {/* Bars & Stats */}
+                    <View style={styles.barsBox}>
+                        {/* HP Bar */}
+                        <ProgressBar current={health} max={maxHealth} color={"#e74c3c"} label={"Health"}
+                                     icon={<Ionicons name={"heart"} size={24} color={"#e74c3c"}/>}
+                        />
+                        {/* XP Bar */}
+                        <ProgressBar
+                            current={currentXP}
+                            max={xpGoal}
+                            color={"#f1c40f"}
+                            label={"Experience"}
+                            icon={<Ionicons name="star" size={24} color="#f1c40f"/>}
+                        />
                     </View>
                 </View>
-                {/* Coin */}
-            </View>
-            <View style={styles.coinlvlBox}>
-                <Text style={styles.lvlText}>Lvl {lvl}</Text>
-                <View style={styles.coinBox}>
-                    <Image source={GAMIFICATION_ICONS.coin} style={styles.coinIcon}/>
-                    <Text style={styles.coinsText}>{coins}</Text>
+
+                {/* Coin + Level */}
+                <View style={styles.coinlvlBox}>
+                    <Text style={styles.lvlText}>Lvl {level}</Text>
+
+                    <View style={styles.rightStatsBox}>
+                        <StatIndicator
+                            value={streak}
+                            iconType={"icon"}
+                            iconName={"flame"}
+                            iconColor={"#ff5722"}
+                        />
+
+                        <StatIndicator
+                            value={coins}
+                            iconType={"image"}
+                            iconSource={GAMIFICATION_ICONS.coin}
+                        />
+                    </View>
                 </View>
             </View>
-        </View>
+
+            <RewardModal
+                visible={showStreakModal}
+                onClose={() => setShowStreakModal(false)}
+                title={`${streak} Tage Streak!`}
+                description={'Starke Leistung!'}
+                animationType="flame"
+            />
+        </>
     );
 };
 
@@ -143,66 +131,56 @@ const styles = StyleSheet.create({
     barsBox: {
         flex: 1,
         justifyContent: 'center',
-        marginTop: 8,
     },
-    barRow: {
-        flexDirection: 'row',
-        alignItems: 'center',
+    progressWrapper: {
         marginBottom: 20,
     },
-    statIcon: {
-        width: 18,
-        height: 18,
-        marginRight: 12,
-        marginBottom: 11,
-    },
-    barCol: {
-        flex: 1,
-    },
-    progressBarContainer: {
-        height: 12,
-        backgroundColor: '#23272F',
-        borderRadius: 5,
-        width: '100%',
-    },
-    progressBar: {
-        height: '100%',
-        borderRadius: 5,
-    },
-    barLabelRow: {
+    progressRow: {
         flexDirection: 'row',
         alignItems: 'center',
+    },
+    iconWrapper: {
+        alignItems: "center",
+        width: 30,
+        marginRight: 10
+    },
+    progressBarBackground: {
+        flex: 1,
+        height: 18,
+        backgroundColor: '#23272F',
+        borderRadius: 9,
+        overflow: "hidden"
+    },
+    progressBarFill: {
+        height: '100%',
+        borderRadius: 9,
+    },
+    progressInfo: {
+        flexDirection: "row",
+        justifyContent: "space-between",
         marginTop: 2,
+        marginLeft: 35,
+        paddingHorizontal: 4,
     },
-    barLabel: {
-        color: 'white',
-        fontSize: 13,
-        fontWeight: 'normal',
+    progressText: {
+        color: "white",
+        fontSize: 14
     },
-    barLabelUnit: {
+    progressLabel: {
         color: 'white',
-        fontSize: 13,
-        fontWeight: 'normal',
-        marginLeft: 2,
+        fontSize: 14,
+        textAlign: 'right',
     },
     coinlvlBox: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         marginHorizontal: 4,
     },
-    coinBox: {
-        flexDirection: 'row',
-        gap: 10,
     },
-    coinsText: {
-        color: 'white',
-        fontSize: 16,
-        fontWeight: 'normal',
-    },
-    coinIcon: {
-        width: 22,
-        height: 22,
-        resizeMode: 'contain',
+    rightStatsBox: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 16
     },
 });
 
