@@ -4,12 +4,6 @@ import * as SecureStore from "expo-secure-store";
 import {router} from "expo-router";
 import {ROUTES} from "@/routes";
 
-let currentAccessToken: string | null = null;
-
-export const setAccessToken = (token: string | null) => {
-    currentAccessToken = token;
-};
-
 const api = axios.create({
     baseURL: Constants.expoConfig?.extra?.API_URL,
     headers: {
@@ -17,26 +11,52 @@ const api = axios.create({
     },
 });
 
+let isRefreshing = false;
+let failedQueue: {
+    resolve: (value?: unknown) => void;
+    reject: (error?: unknown) => void;
+}[] = [];
+
+const processQueue = (error: unknown, token: string | null = null) => {
+    failedQueue.forEach(promise => {
+        if (error) promise.reject(error);
+        else promise.resolve(token);
+    });
+
+    failedQueue = [];
+};
+
 api.interceptors.request.use(
-    (config) => {
-        if (currentAccessToken) {
-            config.headers.Authorization = `Bearer ${currentAccessToken}`;
+    async (config) => {
+        const token = await SecureStore.getItemAsync("accessToken");
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
         }
         return config;
     },
-    error => Promise.reject(error)
+    (error) => Promise.reject(error)
 );
 
 api.interceptors.response.use(
     response => response,
-    async error => {
+    async (error) => {
         const originalRequest = error.config;
 
-        if (
-            error.response?.status === 401 &&
-            !originalRequest._retry
-        ) {
+        if (error.response?.status === 401 && !originalRequest._retry) {
             originalRequest._retry = true;
+
+            if (isRefreshing) {
+                return new Promise((resolve, reject) => {
+                    failedQueue.push({resolve, reject});
+                }).then((token) => {
+                    if (token) {
+                        originalRequest.headers["Authorization"] = `Bearer ${token}`;
+                    }
+                    return api(originalRequest);
+                });
+            }
+
+            isRefreshing = true;
 
             try {
                 const refreshToken = await SecureStore.getItemAsync('refreshToken');
@@ -53,11 +73,16 @@ api.interceptors.response.use(
                     SecureStore.setItemAsync("refreshToken", newRefreshToken),
                 ]);
 
-                setAccessToken(accessToken);
+                processQueue(null, accessToken);
+                isRefreshing = false;
+
                 originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
 
                 return api(originalRequest);
             } catch (refreshError: unknown) {
+                processQueue(refreshError, null);
+                isRefreshing = false;
+
                 console.log("Token refresh fehlgeschlagen", refreshError);
 
                 await SecureStore.deleteItemAsync("accessToken");
