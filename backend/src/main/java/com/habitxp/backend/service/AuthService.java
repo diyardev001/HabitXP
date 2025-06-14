@@ -52,6 +52,8 @@ public class AuthService {
                 .health(100)
                 .maxHealth(100)
                 .currentXP(0)
+                .streak(0)
+                .taskLimit(1)
                 .spaceIds(new ArrayList<>())
                 .bonusIds(new ArrayList<>())
                 .avatars(new ArrayList<>())
