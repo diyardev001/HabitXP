@@ -15,12 +15,12 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
+    private final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 Minuten
+    private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 Tage
+
     private Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
-
-    private final long ACCESS_EXPIRATION = 1000 * 60 * 15; // 15 Minuten
-    private final long REFRESH_EXPIRATION = 1000L * 60 * 60 * 24 * 7; // 7 Tage
 
     public String generateAccessToken(String userId) {
         return buildToken(userId, ACCESS_EXPIRATION);

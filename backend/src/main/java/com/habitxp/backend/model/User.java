@@ -20,7 +20,6 @@ public class User {
 
     @Id
     private String id;
-    private String refreshToken;
 
     private String firstName;
     private String lastName;

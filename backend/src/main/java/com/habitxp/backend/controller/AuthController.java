@@ -1,7 +1,6 @@
 package com.habitxp.backend.controller;
 
 import com.habitxp.backend.dto.*;
-import com.habitxp.backend.model.User;
 import com.habitxp.backend.security.JwtService;
 import com.habitxp.backend.service.AuthService;
 import lombok.RequiredArgsConstructor;
@@ -37,18 +36,9 @@ public class AuthController {
             return ResponseEntity.status(401).body("Refresh token invalid or expired.");
         }
 
-        String email = jwtService.extractUserId(refreshToken);
-        User user = authService.getUserByEmail(email);
-
-        if (!refreshToken.equals(user.getRefreshToken())) {
-            return ResponseEntity.status(401).body("Refresh token mismatch.");
-        }
-
-        String newAccessToken = jwtService.generateAccessToken(email);
-        String newRefreshToken = jwtService.generateRefreshToken(email);
-
-        user.setRefreshToken(newRefreshToken);
-        authService.saveUser(user);
+        String userId = jwtService.extractUserId(refreshToken);
+        String newAccessToken = jwtService.generateAccessToken(userId);
+        String newRefreshToken = jwtService.generateRefreshToken(userId);
 
         return ResponseEntity.ok(new TokenResponse(newAccessToken, newRefreshToken));
     }
