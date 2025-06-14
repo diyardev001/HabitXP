@@ -7,16 +7,17 @@ interface ProgressBarProps {
     color: string;
     label: string;
     icon: React.ReactNode;
+    highlighted?: boolean;
 }
 
-const ProgressBar: React.FC<ProgressBarProps> = ({current, max, color, label, icon}) => {
+const ProgressBar: React.FC<ProgressBarProps> = ({current, max, color, label, icon, highlighted}) => {
     const percentage = (current / max) * 100;
 
     return (
         <View style={styles.wrapper}>
             <View style={styles.row}>
                 <View style={styles.iconWrapper}>{icon}</View>
-                <View style={styles.barBackground}>
+                <View style={[styles.barBackground, highlighted && styles.highlighted]}>
                     <View style={[styles.barFill, {width: `${percentage}%`, backgroundColor: color}]}/>
                 </View>
             </View>
@@ -30,7 +31,7 @@ const ProgressBar: React.FC<ProgressBarProps> = ({current, max, color, label, ic
 
 const styles = StyleSheet.create({
     wrapper: {
-        marginBottom: 20,
+        marginBottom: 15,
     },
     row: {
         flexDirection: 'row',
@@ -41,10 +42,20 @@ const styles = StyleSheet.create({
     },
     barBackground: {
         flex: 1,
-        height: 18,
+        height: 15,
         backgroundColor: '#23272F',
         borderRadius: 9,
         overflow: 'hidden',
+    },
+    highlighted: {
+        borderWidth: 2,
+        borderColor: '#FFD700',
+        borderRadius: 9,
+        shadowColor: '#FFD700',
+        shadowOffset: {width: 0, height: 0},
+        shadowOpacity: 0.5,
+        shadowRadius: 6,
+        elevation: 5, // Für Android
     },
     barFill: {
         height: '100%',
