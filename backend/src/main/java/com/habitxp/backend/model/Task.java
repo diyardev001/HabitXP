@@ -137,6 +137,8 @@ public class Task {
 
         if (!stillInSamePeriod) {
             this.isCompleted = false;
+        } else {
+            this.isCompleted = isPeriodCompleted();
         }
     }
 
@@ -151,6 +153,8 @@ public class Task {
                 return now.get(weekFields.weekOfWeekBasedYear()) == date.get(weekFields.weekOfWeekBasedYear()) && now.getYear() == date.getYear();
             case MONTHLY:
                 return now.getMonth() == date.getMonth() && now.getYear() == date.getYear();
+            case NONE:
+                return true;
             default:
                 return false;
         }

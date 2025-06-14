@@ -67,7 +67,7 @@ export default function CreateHabitScreen() {
             title,
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             frequency,
-            times: frequency !== "NONE" ? parseInt(times) : 0,
+            times: frequency !== "NONE" ? parseInt(times) : 1,
             spaceId: space,
             colorKey: selectedColorKey,
         };
