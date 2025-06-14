@@ -13,6 +13,7 @@ export interface UserData {
     streakBroken: boolean;
     xpFactor: number;
     xpBonusActive: boolean;
+    xpFactorUntil: string;
     level: number;
     xp: number;
     currentXP: number;
