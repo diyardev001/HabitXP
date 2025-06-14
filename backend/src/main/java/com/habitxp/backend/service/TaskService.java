@@ -2,7 +2,8 @@ package com.habitxp.backend.service;
 
 import com.habitxp.backend.dto.CompletionResponse;
 import com.habitxp.backend.dto.StatusResponse;
-import com.habitxp.backend.model.Space;
+import com.habitxp.backend.model.Frequency;
+import com.habitxp.backend.model.FrequencyOrder;
 import com.habitxp.backend.model.Task;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.SpaceRepository;
@@ -13,8 +14,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.time.LocalDate;
+import java.time.temporal.WeekFields;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
+import java.util.Locale;
 
 @Service
 @RequiredArgsConstructor
@@ -44,13 +48,20 @@ public class TaskService {
     public Task createTask(Task task) {
         task.setRewardXP(aiagent.calculateXP(task));
         task.setRewardCoins(aiagent.calculateCoins(task));
-        Optional<Space> spaceOpt = spaceService.getSpaceById(task.getSpaceId());
-        Task savedTask = taskRepository.save(task);
-        if (spaceOpt.isPresent()) {
-            Space space = spaceOpt.get();
-            space.addTask(savedTask.getId());
 
-            spaceRepository.save(space);
+        User user = getUserById(task.getUserId());
+        long currentTaskCount = taskRepository.countByUserId(user.getId());
+        if (currentTaskCount >= user.getTaskLimit()) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Task Limit reached (" + user.getTaskLimit() + ")");
+        }
+
+        Task savedTask = taskRepository.save(task);
+
+        if (task.getSpaceId() != null) {
+            spaceRepository.findById(task.getSpaceId()).ifPresent(space -> {
+                space.addTask(savedTask.getId());
+                spaceRepository.save(space);
+            });
         }
         return savedTask;
     }
@@ -103,6 +114,53 @@ public class TaskService {
         user.addXP(task.getRewardXP());
         user.setCoins(user.getCoins() + task.getRewardCoins());
         user.xpFactorReset();
+
+        List<Task> userTasks = taskRepository.findByUserId(user.getId());
+        Frequency lowestFrequency = determineLowestFrequency(userTasks);
+
+        if (!hasAlreadyCountedStreak(user, lowestFrequency, userTasks)) {
+            user.setStreak(user.getStreak() + 1);
+            user.setLastStreakUpdate(LocalDate.now());
+        }
+        
         userRepository.save(user);
     }
+
+    private Frequency determineLowestFrequency(List<Task> tasks) {
+        return tasks.stream()
+                .map(Task::getFrequency)
+                .min(Comparator.comparingInt(f -> FrequencyOrder.valueOf(f.name()).getOrder()))
+                .orElse(Frequency.DAILY); // Default fallback
+    }
+
+    private boolean hasAlreadyCountedStreak(User user, Frequency lowestFrequency, List<Task> tasks) {
+        LocalDate today = LocalDate.now();
+
+        switch (lowestFrequency) {
+            case DAILY:
+                return user.getLastStreakUpdate() != null && user.getLastStreakUpdate().isEqual(today);
+            case WEEKLY:
+                WeekFields weekFields = WeekFields.of(Locale.getDefault());
+                int currentWeek = today.get(weekFields.weekOfWeekBasedYear());
+                int currentYear = today.getYear();
+
+                if (user.getLastStreakUpdate() == null) return false;
+
+                int lastWeek = user.getLastStreakUpdate().get(weekFields.weekOfWeekBasedYear());
+                int lastYear = user.getLastStreakUpdate().getYear();
+
+                return lastWeek == currentWeek && lastYear == currentYear;
+
+            case MONTHLY:
+                if (user.getLastStreakUpdate() == null) return false;
+
+                return user.getLastStreakUpdate().getYear() == today.getYear()
+                        && user.getLastStreakUpdate().getMonth() == today.getMonth();
+
+            default:
+                return false;
+        }
+    }
+
+
 }
