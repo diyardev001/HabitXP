@@ -8,6 +8,7 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -32,6 +33,7 @@ public class User {
     private int coins;
 
     private int streak;
+    private LocalDate lastStreakUpdate;
     private boolean streakBroken;
     private boolean StreakFreezeActive;
     private Instant StreakFreezeUntil;
