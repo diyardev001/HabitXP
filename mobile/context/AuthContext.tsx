@@ -93,6 +93,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({children}
 
     const contextValue = useMemo(() => ({
         user,
+        userId: user?.id ?? null,
         token,
         login,
         register,

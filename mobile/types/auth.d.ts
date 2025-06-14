@@ -14,6 +14,7 @@ export type RegisterRequest = {
 
 export type AuthContextType = {
     user: User | null;
+    userId: string | null;
     token: string | null;
     isLoading: boolean;
     login: (email: string, password: string) => Promise<void>;

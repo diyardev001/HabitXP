@@ -13,6 +13,7 @@ import DropdownSelect from "@/components/DropdownSelect";
 import {Colors} from "@/constants/Colors";
 import {NewTask} from "@/types/task";
 import {queryClient} from "@/lib/queryClient";
+import {useUserData} from "@/hooks/useUserData";
 
 export default function CreateHabitScreen() {
     const [title, setTitle] = useState("");
@@ -25,6 +26,7 @@ export default function CreateHabitScreen() {
 
     const colors = useTheme();
     const colorOptions = Object.entries(Colors.habit);
+    const {data: userData} = useUserData();
 
     const frequencyOptions = [
         {label: "Täglich", value: "DAILY"},
@@ -61,6 +63,7 @@ export default function CreateHabitScreen() {
 
         //const spaceData = await getSpaceById(space);
         const habit: NewTask = {
+            userId: userData?.id!,
             title,
             duration: `${durationValue}${durationUnit === "HOURS" ? "h" : "min"}`,
             frequency,
@@ -72,6 +75,7 @@ export default function CreateHabitScreen() {
         try {
             await createTask(habit);
             await queryClient.invalidateQueries({queryKey: ['tasks']});
+            await queryClient.invalidateQueries({queryKey: ['userData']});
             router.replace("/");
         } catch (error) {
             console.error("Fehler beim Erstellen:", error);
