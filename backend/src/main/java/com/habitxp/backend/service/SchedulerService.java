@@ -73,9 +73,6 @@ public class SchedulerService {
     public void restartStreak() {
         List<User> users = userRepository.findAll();
         for (User user : users) {
-            if (!user.isStreakBroken()) {
-                user.setStreak(user.getStreak() + 1);
-            }
             if (user.isStreakBroken()) {
                 user.setStreakBroken(false);
             }
