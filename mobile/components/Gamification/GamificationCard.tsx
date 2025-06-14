@@ -5,6 +5,8 @@ import {Ionicons} from "@expo/vector-icons";
 import ProgressBar from "@/components/Gamification/ProgressBar";
 import StatIndicator from "@/components/Gamification/StatIndicator";
 import RewardModal from "@/components/RewardModal";
+import {useRemainingTime} from "@/hooks/useRemainingTime";
+import {useTasks} from "@/hooks/useTasks";
 
 const STREAK_MILESTONES = [5, 10, 25, 50, 100];
 
@@ -21,11 +23,25 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
                                                                userData
                                                            }) => {
     const {
-        health, maxHealth, currentXP, xpGoal, level, coins, streak, avatars
+        health,
+        maxHealth,
+        currentXP,
+        xpGoal,
+        level,
+        coins,
+        streak,
+        avatars,
+        xpBonusActive,
+        xpFactor,
+        xpFactorUntil,
+        taskLimit
     } = userData;
+
+    const {data: habits = [], isLoading, isError} = useTasks();
     const avatar = avatars.length > 0 ? avatars[0] : 'diamond';
     const [showStreakModal, setShowStreakModal] = useState(false);
     const [alreadyShown, setAlreadyShown] = useState(false);
+    const remainingTime = useRemainingTime(xpFactorUntil);
 
     useEffect(() => {
         if (STREAK_MILESTONES.includes(streak) && !alreadyShown) {
@@ -57,7 +73,14 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
                             color={"#f1c40f"}
                             label={"Experience"}
                             icon={<Ionicons name="star" size={24} color="#f1c40f"/>}
+                            highlighted={xpBonusActive && remainingTime !== null}
                         />
+                        <ProgressBar
+                            current={habits.length}
+                            max={taskLimit}
+                            color={"#3498db"}
+                            label={`Habits`}
+                            icon={<Ionicons name="journal" size={24} color={"#3498db"}></Ionicons>}/>
                     </View>
                 </View>
 
@@ -65,7 +88,16 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
                 <View style={styles.coinlvlBox}>
                     <Text style={styles.lvlText}>Lvl {level}</Text>
 
+
                     <View style={styles.rightStatsBox}>
+                        {xpBonusActive && remainingTime && (
+                            <View style={styles.xpBonusContainer}>
+                                <Text style={styles.xpBonusIcon}>x{xpFactor} ·</Text>
+                                <Text style={styles.xpBonusText}>
+                                    {remainingTime.hours}h {remainingTime.minutes}min
+                                </Text>
+                            </View>
+                        )}
                         <StatIndicator
                             value={streak}
                             iconType={"icon"}
@@ -122,6 +154,29 @@ const styles = StyleSheet.create({
         flex: 1,
         justifyContent: 'center',
     },
+    xpBonusContainer: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(255, 215, 0, 0.1)',
+        borderRadius: 8,
+        paddingHorizontal: 6,
+        paddingVertical: 4,
+    },
+    xpBonusIcon: {
+        color: "#FFD700",
+        fontWeight: "bold",
+        marginRight: 5,
+        fontSize: 20
+    },
+    xpBonusTextContainer: {
+        flexDirection: "column",
+        alignItems: "center"
+    },
+    xpBonusText: {
+        color: "#FFD700",
+        fontSize: 13,
+        fontWeight: "bold"
+    },
     progressWrapper: {
         marginBottom: 20,
     },
@@ -164,6 +219,7 @@ const styles = StyleSheet.create({
     coinlvlBox: {
         flexDirection: 'row',
         justifyContent: 'space-between',
+        alignItems: "center",
         marginHorizontal: 4,
     },
     lvlText: {
