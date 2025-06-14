@@ -37,12 +37,6 @@ public class TaskController {
     public ResponseEntity<Task> createTask(@Valid @RequestBody Task task, Authentication auth) {
         task.setUserId(auth.getName());
         Task savedTask = taskService.createTask(task);
-
-        spaceRepository.findById(task.getSpaceId()).ifPresent(space -> {
-            space.addTask(savedTask.getId());
-            spaceRepository.save(space);
-        });
-
         return ResponseEntity.status(HttpStatus.CREATED).body(savedTask);
     }
 

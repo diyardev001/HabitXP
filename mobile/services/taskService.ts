@@ -5,11 +5,17 @@ export const createTask = async (task: NewTask) => {
     try {
         const res = await api.post("/tasks", task);
         return res.data;
-    } catch (err) {
-        console.error("Fehler beim Erstellen des Tasks:", err);
+    } catch (err: any) {
+        if (err.response) {
+            console.error("Backend-Fehler:", err.response.data);
+            if (err.response.data.message?.includes("Task Limit reached")) {
+                throw new Error("Du hast dein aktuelles Aufgabenlimit erreicht. Steige im Level auf, um mehr Aufgaben erstellen zu können!");
+            }
+        }
         throw err;
     }
 };
+
 
 export const getTasks = async (): Promise<Task[]> => {
     const res = await api.get("/tasks");
