@@ -1,11 +1,14 @@
 package com.habitxp.backend.service;
 
+import com.habitxp.backend.dto.UserProfileResponse;
 import com.habitxp.backend.model.Space;
 import com.habitxp.backend.model.User;
+import com.habitxp.backend.repository.TaskRepository;
 import com.habitxp.backend.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -14,9 +17,11 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final TaskRepository taskRepository;
 
-    public Optional<User> getUserById(String id) {
-        return userRepository.findById(id);
+    public User getUserById(String id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
     public Optional<User> getUserFromSpace(Space space) {
@@ -38,6 +43,28 @@ public class UserService {
 
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
+    }
+
+    public UserProfileResponse getUserProfile(String userId) {
+        User user = getUserById(userId);
+        long currentTasks = taskRepository.countByUserId(userId);
+        return new UserProfileResponse(
+                user.getId(),
+                user.getUsername(),
+                user.getLevel(),
+                user.getHealth(),
+                user.getMaxHealth(),
+                user.getCurrentXP(),
+                user.getXpGoal(),
+                user.getXpFactor(),
+                user.isXpBonusActive(),
+                user.getXpFactorUntil() != null ? user.getXpFactorUntil().toString() : null,
+                user.getCoins(),
+                user.getStreak(),
+                user.getTaskLimit(),
+                currentTasks,
+                user.getAvatars()
+        );
     }
 
     public void addSpaceId(String userId, String spaceId) {
