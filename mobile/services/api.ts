@@ -12,12 +12,9 @@ const api = axios.create({
 });
 
 let isRefreshing = false;
-let failedQueue: {
-    resolve: (value?: unknown) => void;
-    reject: (error?: unknown) => void;
-}[] = [];
+let failedQueue: any[] = [];
 
-const processQueue = (error: unknown, token: string | null = null) => {
+const processQueue = (error: any, token: string | null = null) => {
     failedQueue.forEach(promise => {
         if (error) promise.reject(error);
         else promise.resolve(token);
@@ -68,39 +65,28 @@ api.interceptors.response.use(
 
                 const {accessToken, refreshToken: newRefreshToken} = res.data;
 
-                await Promise.all([
-                    SecureStore.setItemAsync("accessToken", accessToken),
-                    SecureStore.setItemAsync("refreshToken", newRefreshToken),
-                ]);
+                await SecureStore.setItemAsync("accessToken", accessToken);
+                await SecureStore.setItemAsync("refreshToken", newRefreshToken);
 
                 processQueue(null, accessToken);
                 isRefreshing = false;
 
-                originalRequest.headers["Authorization"] = `Bearer ${accessToken}`;
+                originalRequest.headers.Authorization = `Bearer ${accessToken}`;
 
                 return api(originalRequest);
-            } catch (refreshError: unknown) {
+            } catch (refreshError) {
                 processQueue(refreshError, null);
                 isRefreshing = false;
-
-                console.log("Token refresh fehlgeschlagen", refreshError);
 
                 await SecureStore.deleteItemAsync("accessToken");
                 await SecureStore.deleteItemAsync("refreshToken");
 
                 router.replace(ROUTES.LOGIN);
-
-                const error = refreshError instanceof Error
-                    ? refreshError
-                    : new Error("Unbekannter Fehler beim Token-Refresh");
-
-                return Promise.reject(error);
+                return Promise.reject(refreshError);
             }
         }
 
-        return Promise.reject(
-            error instanceof Error ? error : new Error("Unbekannter API-Fehler")
-        );
+        return Promise.reject(error);
     }
 );
 
