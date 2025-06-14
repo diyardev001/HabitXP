@@ -12,9 +12,10 @@ import java.util.Map;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Map<String, String>> handleResponseStatusException(ResponseStatusException ex) {
-        Map<String, String> body = new HashMap<>();
+    public ResponseEntity<Map<String, Object>> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, Object> body = new HashMap<>();
         body.put("message", ex.getReason()); // das ist "Email already in use"
+        body.put("status", ex.getStatusCode().value());
         return new ResponseEntity<>(body, ex.getStatusCode());
     }
 }
