@@ -38,7 +38,7 @@ const GamificationCard: React.FC<GamificationCardProps> = ({
     } = userData;
 
     const {data: habits = [], isLoading, isError} = useTasks();
-    const avatar = avatars.length > 0 ? avatars[0] : 'diamond';
+    const avatar = (avatars && avatars.length > 0) ? avatars[0] : 'diamond';
     const [showStreakModal, setShowStreakModal] = useState(false);
     const [alreadyShown, setAlreadyShown] = useState(false);
     const remainingTime = useRemainingTime(xpFactorUntil);
