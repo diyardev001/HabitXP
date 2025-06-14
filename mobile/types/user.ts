@@ -1,25 +1,17 @@
 export interface UserData {
     id: string;
-    refreshToken: string;
-    firstName: string;
-    lastName: string;
     username: string;
-    email: string;
-    password: string;
+    level: number;
     health: number;
     maxHealth: number;
-    coins: number;
-    streak: number;
-    streakBroken: boolean;
-    xpFactor: number;
-    xpBonusActive: boolean;
-    xpFactorUntil: string;
-    level: number;
-    xp: number;
     currentXP: number;
     xpGoal: number;
+    xpFactor: number;
+    xpBonusActive: boolean;
+    xpFactorUntil: string | null;
+    coins: number;
+    streak: number;
     taskLimit: number;
-    spaceIds: string[];
-    bonusIds: string[];
+    currentTasks: number;
     avatars: string[];
 }
