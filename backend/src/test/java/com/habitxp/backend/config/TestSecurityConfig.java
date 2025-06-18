@@ -15,8 +15,30 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import static org.springframework.http.HttpStatus.UNAUTHORIZED;
 
+/**
+ * <h1>Spezielle Security-Konfiguration für Integrationstests.</h1>
+ *
+ * <h2>Zweck:</h2>
+ * Diese Konfiguration ersetzt die produktive Sicherheitskonfiguration,
+ * um Tests in einer kontrollierten Umgebung auszuführen.
+ *
+ * <h2>Eigenschaften:</h2>
+ * <ul>
+ *   <li>CSRF-Schutz ist deaktiviert</li>
+ *   <li>Anonymous Access ist deaktiviert, um explizite Autorisierung zu erzwingen</li>
+ *   <li>Alle Endpunkte unter <code>/auth/**</code> sind öffentlich zugänglich</li>
+ *   <li>Alle anderen Endpunkte erfordern gültige Authentifizierung</li>
+ *   <li>Ein <code>JwtAuthenticationFilter</code> wird eingebunden</li>
+ *   <li>Bei fehlender Authentifizierung wird ein 401 (Unauthorized) zurückgegeben</li>
+ * </ul>
+ *
+ * <h2>Hinweis:</h2>
+ * Diese Klasse ist mit <code>@TestConfiguration</code> annotiert und wird
+ * ausschließlich im Testkontext eingebunden (z. B. mit <code>@Import(TestSecurityConfig.class)</code>).
+ */
+
 @TestConfiguration
-@Import({JwtAuthenticationFilter.class, JwtService.class}) // falls du deine echten Beans benutzen willst
+@Import({JwtAuthenticationFilter.class, JwtService.class})
 public class TestSecurityConfig {
 
     @Bean
@@ -31,7 +53,7 @@ public class TestSecurityConfig {
                 .exceptionHandling(exception ->
                         exception.authenticationEntryPoint(new HttpStatusEntryPoint(UNAUTHORIZED))
                 )
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class); // optional: nur falls du realistisch JWT testen willst
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

@@ -7,6 +7,26 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * <h1>Unit-Tests für die Klasse {@link com.habitxp.backend.security.JwtService}</h1>
+ *
+ * <h2>Testziel:</h2>
+ * Testet die Generierung, Validierung und Extraktion von Benutzerinformationen aus
+ * JWTs für Access- und Refresh-Tokens.
+ *
+ * <h2>Getestete Szenarien:</h2>
+ * <ul>
+ *   <li>Erzeugung und Validierung eines gültigen Access-Tokens</li>
+ *   <li>Erzeugung und Validierung eines gültigen Refresh-Tokens</li>
+ *   <li>Verhalten bei Übergabe eines ungültigen Tokens</li>
+ * </ul>
+ *
+ * <h2>Hinweise:</h2>
+ * <ul>
+ *   <li>Die JWT-Secret wird manuell per Reflection gesetzt (bypasst @Value)</li>
+ * </ul>
+ */
+
 public class JwtServiceTest {
 
     private JwtService jwtService;

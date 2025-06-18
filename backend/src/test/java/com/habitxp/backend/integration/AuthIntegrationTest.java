@@ -22,6 +22,30 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * <h1>Integrationstests für die Authentifizierungs-Endpunkte der Anwendung</h1>
+ * <p>
+ * <h2>Testziel:</h2>
+ * Verifiziert den gesamten Authentifizierungs-Flow inklusive Registrierung, Login,
+ * Token-Erneuerung und Fehlerbehandlung bei ungültigen oder doppelten Anmeldedaten.
+ * <p>
+ * <h2>Getestete Szenarien:</h2>
+ * <ul>
+ *     <li>Erfolgreiche Registrierung eines neuen Benutzers</li>
+ *     <li>Erfolgreicher Login nach Rgistrierung</li>
+ *     <li>Verwendung des Refresh Tokens zur Erneuerung von Tokens</li>
+ *     <li>Login mit ungültigen Anmeldedaten (z. B. falsches Passwort)</li>
+ *     <li>Fehlermeldung bei mehrfacher Registrierung derselben E-Mail-Adresse</li>
+ * </ul>
+ * <p>
+ * <h2>Rahmenbedingungen:</h2>
+ * <ul>
+ *     <li>Testprofil 'test' wird verwendet</li>
+ *     <li>Datenbank wird vor und nach den Tests bereinigt, wenn in application-test.properties true</li>
+ *     <li>Spring Security is durch {@link TestSecurityConfig} für Tests konfiguriert</li>
+ * </ul>
+ */
+
 @ActiveProfiles("test")
 @SpringBootTest
 @AutoConfigureMockMvc

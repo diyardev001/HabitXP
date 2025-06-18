@@ -22,6 +22,29 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+/**
+ * <h1>Integrationstests für den Zugriff auf geschützte Endpunkte mit und ohne JWT-Token.</h1>
+ *
+ * <h2>Testziel:</h2>
+ * Überprüft die Zugriffskontrolle und das Verhalten des Systems bei autorisierten
+ * und nicht autorisierten HTTP-Anfragen auf geschützte Ressourcen.
+ *
+ * <h2>Getestete Szenarien:</h2>
+ * <ul>
+ *   <li>Erfolgreicher Zugriff auf geschützte Endpunkte mit gültigem JWT</li>
+ *   <li>Verweigerung des Zugriffs ohne JWT (erwartet 401 oder 403)</li>
+ *   <li>Verweigerung des Zugriffs mit ungültigem JWT</li>
+ * </ul>
+ *
+ * <h2>Rahmenbedingungen:</h2>
+ * <ul>
+ *   <li>Testprofil 'test' wird verwendet</li>
+ *   <li>Registriert den Testbenutzer oder loggt sich alternativ ein</li>
+ *   <li>Spring Security ist durch {@link TestSecurityConfig} für Tests konfiguriert</li>
+ *   <li>Verwendet {@link MockMvc} zur Simulation von HTTP-Anfragen</li>
+ * </ul>
+ */
+
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Import(TestSecurityConfig.class)
