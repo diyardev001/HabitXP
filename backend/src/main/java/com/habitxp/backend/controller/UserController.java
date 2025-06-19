@@ -1,5 +1,6 @@
 package com.habitxp.backend.controller;
 
+import com.habitxp.backend.dto.LevelUpRequest;
 import com.habitxp.backend.dto.UserProfileResponse;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.service.UserService;
@@ -36,4 +37,15 @@ public class UserController {
         userService.deleteUser(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/levelup")
+    public ResponseEntity<String> levelUpBonus(@RequestBody LevelUpRequest request) {
+        try {
+            userService.levelUp(request.getUserId(), request.getChoice());
+            return ResponseEntity.ok("Level-Up-Bonus angewendet.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
 }

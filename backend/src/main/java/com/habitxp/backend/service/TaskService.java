@@ -119,7 +119,7 @@ public class TaskService {
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
     }
 
-    private void applyRewardsToUser(User user, Task task) {
+    public void applyRewardsToUser(User user, Task task) {
         user.addXP(task.getRewardXP());
         user.setCoins(user.getCoins() + task.getRewardCoins());
 

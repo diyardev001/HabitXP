@@ -45,6 +45,19 @@ public class UserService {
         return userRepository.existsByEmail(email);
     }
 
+    public void levelUp(String userId, String choice) {
+        User user = userRepository.findById(userId).orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        switch (choice) {
+            case "HEALTH" -> user.setMaxHealth(user.getMaxHealth() + 2);
+            case "TASK_LIMIT" -> user.setTaskLimit(user.getTaskLimit() + 1);
+            default -> throw new IllegalArgumentException("Ungültige Auswahl: " + choice);
+        }
+
+        user.setHealth(user.getMaxHealth()); // immer voll auffüllen nach Level-Up
+        userRepository.save(user);
+    }
+
     public UserProfileResponse getUserProfile(String userId) {
         User user = getUserById(userId);
         long currentTasks = taskRepository.countByUserId(userId);

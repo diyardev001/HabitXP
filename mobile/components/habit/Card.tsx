@@ -6,6 +6,10 @@ import {Colors} from "@/constants/Colors";
 import RewardModal from "@/components/RewardModal";
 import {RewardItem} from "@/types/reward";
 import {queryClient} from '@/lib/queryClient';
+import { selectLevelUpBonus } from '@/services/userService';
+import { useUserData } from "@/hooks/useUserData";
+import LevelUpModal from '../LevelUpModal';
+
 
 interface CardProps {
     id: string;
@@ -37,6 +41,23 @@ export default function Card({
                                  completionsCount
                              }: Readonly<CardProps>) {
     const [showModal, setShowModal] = useState(false);
+    const [showLevelUpModal, setShowLevelUpModal] = useState(false);
+
+    const { data: userData } = useUserData();
+
+
+    const handleLevelUpChoice = async (choice: "HEALTH" | "TASK_LIMIT") => {
+    try {
+        if (!userData?.id) return;
+        await selectLevelUpBonus(userData.id, choice);
+        setShowLevelUpModal(false);
+        await queryClient.invalidateQueries({ queryKey: ['userData'] });
+    } catch (error) {
+        console.error("Fehler beim Anwenden der Belohnung:", error);
+    }
+    };
+
+
     const [rewards, setRewards] = useState<RewardItem[]>([]);
 
     const colorSet = Colors.habit[colorKey];
@@ -50,11 +71,7 @@ export default function Card({
             const response = await completeTask(id);
             if (response.completed) {
                 if(response.levelup){
-                    setRewards([
-                        {label: "XP", value: response.rewardXP},
-                        {label: "Coins", value: response.rewardCoins},
-                    ]);
-                    setShowModal(true);
+                    setShowLevelUpModal(true);
                 }
                 await queryClient.invalidateQueries({queryKey: ['tasks']});
                 await queryClient.invalidateQueries({queryKey: ['userData']});
@@ -120,6 +137,12 @@ export default function Card({
                 rewards={rewards}
                 animationType={"confetti"}
             />
+
+            <LevelUpModal
+                visible={showLevelUpModal}
+                onSelect={handleLevelUpChoice}
+            />
+
         </View>
     );
 }

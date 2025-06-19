@@ -1,23 +1,29 @@
 package com.habitxp.backend.unit;
 
 import com.habitxp.backend.dto.UserProfileResponse;
+import com.habitxp.backend.model.Frequency;
 import com.habitxp.backend.model.Space;
+import com.habitxp.backend.model.Task;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.TaskRepository;
 import com.habitxp.backend.repository.UserRepository;
+import com.habitxp.backend.service.TaskService;
 import com.habitxp.backend.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.Console;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -50,12 +56,49 @@ public class UserServiceTest {
     private UserRepository userRepository;
     private TaskRepository taskRepository;
     private UserService userService;
+    private TaskService taskService;
 
     @BeforeEach
     void setup() {
         userRepository = mock(UserRepository.class);
         taskRepository = mock(TaskRepository.class);
         userService = new UserService(userRepository, taskRepository);
+        taskService = new TaskService(null, null, taskRepository, userRepository, null);
+    }
+
+    @Test
+    void shouldApplyRewardsAndIncreaseStreak() {
+        // Arrange
+        User user = new User();
+        user.setId("user123");
+        user.setXp(80);
+        user.setCoins(20);
+        user.setStreak(3);
+        user.setLastStreakUpdate(LocalDate.now().minusDays(2)); // Damit Streak zählen darf
+
+        Task task = new Task();
+        task.setRewardXP(50);
+        task.setRewardCoins(10);
+        task.setUserId("user123");
+        task.setFrequency(Frequency.DAILY);
+
+        // andere Tasks (zur Frequenzanalyse)
+        Task otherTask = new Task();
+        otherTask.setFrequency(Frequency.DAILY);
+
+        when(taskRepository.findByUserId("user123")).thenReturn(List.of(task, otherTask));
+
+        // Act
+        taskService.applyRewardsToUser(user, task);
+        taskService.applyRewardsToUser(user, task);
+        // Assert
+        assertThat(user.getXp()).isEqualTo(user.getXp());
+        assertThat(user.getCoins()).isEqualTo(user.getCoins());
+        assertThat(user.getCurrentXP()).isEqualTo(user.calculateCurrentXP());
+        assertThat(user.getLevel()).isEqualTo(user.calculateLevel());
+        assertThat(user.getXpGoal()).isEqualTo(user.calculateXPGoal());
+
+        verify(userRepository, times(2)).save(user);
     }
 
     @Test

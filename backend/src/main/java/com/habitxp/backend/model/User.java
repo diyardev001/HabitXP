@@ -49,9 +49,6 @@ public class User {
 
     private int taskLimit;
 
-    private boolean healthOption;
-    private boolean taskLimitOption;
-
     private List<String> spaceIds;
     private List<String> bonusIds;
 
@@ -69,17 +66,10 @@ public class User {
     public void addXP(int baseXP) {
         int gainedXP = baseXP * xpFactor;
         this.xp += gainedXP;
-
-        int oldLevel = this.level;
-        int newLevel = calculateLevel();
-        this.level = newLevel;
-
+        
+        calculateLevel();
         calculateCurrentXP();
         calculateXPGoal();
-
-        if (newLevel > oldLevel) {
-            levelup();
-        }
     }
 
     public int calculateLevel() {
@@ -89,19 +79,21 @@ public class User {
             xpSum += Math.round(100 * Math.pow(1.2, tempLevel));
             tempLevel++;
         }
+        this.level=tempLevel;
         return tempLevel;
     }
 
-    public void calculateCurrentXP() {
+    public int calculateCurrentXP() {
         double xpSum = 0;
         for (int i = 0; i < level; i++) {
             xpSum += Math.round(100 * Math.pow(1.2, i));
         }
-        this.currentXP = (int) (xp - xpSum);
+        return this.currentXP = (int) (xp - xpSum);
     }
 
-    public void calculateXPGoal() {
+    public int calculateXPGoal() {
         this.xpGoal = (int) Math.round(100 * Math.pow(1.2, level));
+        return xpGoal;
     }
 
     public void xpFactorReset() {
@@ -117,18 +109,6 @@ public class User {
             StreakFreezeActive = false;
             StreakFreezeUntil = null;
         }
-    }
-
-    public void levelup() {
-        if (this.healthOption) {
-            this.maxHealth += 2;
-            this.healthOption=false;
-
-        } else if (this.taskLimitOption) {
-            taskLimit += 1;
-            this.taskLimitOption=false;
-        }
-        this.health = maxHealth;
     }
 
     public void coinPenalty() {
