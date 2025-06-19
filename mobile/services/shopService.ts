@@ -1,13 +1,9 @@
 import api from "@/services/api";
-import { Bonus } from "@/types/bonus";
-import { BonusPurchaseRequest } from "@/types/bonus";
+import {Bonus} from "@/types/bonus";
 
 export async function fetchBonuses(): Promise<Bonus[]> {
-  const response = await fetch(`${process.env.EXPO_PUBLIC_API_URL}/bonuses`);
-  if (!response.ok) {
-    throw new Error("Bonuses konnten nicht geladen werden");
-  }
-  return response.json();
+    const response = await api.get<Bonus[]>("/bonuses");
+    return response.data;
 }
 
 export const buyBonus = async (bonusId: string, userId: string): Promise<string> => {
