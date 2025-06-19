@@ -49,6 +49,9 @@ public class User {
 
     private int taskLimit;
 
+    private boolean healthOption;
+    private boolean taskLimitOption;
+
     private List<String> spaceIds;
     private List<String> bonusIds;
 
@@ -75,7 +78,7 @@ public class User {
         calculateXPGoal();
 
         if (newLevel > oldLevel) {
-            levelup(true, false);
+            levelup();
         }
     }
 
@@ -116,12 +119,15 @@ public class User {
         }
     }
 
-    public void levelup(boolean health, boolean taskL) {
-        if (health) {
+    public void levelup() {
+        if (this.healthOption) {
             this.maxHealth += 2;
             this.health = maxHealth;
-        } else if (taskL) {
+            this.healthOption=false;
+
+        } else if (this.taskLimitOption) {
             taskLimit += 1;
+            this.taskLimitOption=false;
         }
     }
 

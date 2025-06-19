@@ -20,6 +20,31 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.*;
 
+/**
+ * <h1>Unit-Tests für die Benutzerlogik in der Klasse {@link com.habitxp.backend.service.UserService}</h1>
+ *
+ * <h2>Testziel:</h2>
+ * Überprüft die internen Geschäftslogiken rund um Benutzerverwaltung, wie Abruf, Erstellung,
+ * Aktualisierung, Löschung und Profilauswertung.
+ *
+ * <h2>Getestete Szenarien:</h2>
+ * <ul>
+ *   <li>Benutzer kann per ID gefunden werden</li>
+ *   <li>Exception wird geworfen, wenn Benutzer nicht gefunden wird</li>
+ *   <li>Benutzer kann erstellt, aktualisiert und gelöscht werden</li>
+ *   <li>Überprüfung, ob Benutzer per E-Mail existiert</li>
+ *   <li>Benutzer aus Space-Objekt extrahieren</li>
+ *   <li>Rückgabe eines vollständigen Benutzerprofils</li>
+ *   <li>Hinzufügen einer Space-ID zum Benutzer</li>
+ * </ul>
+ *
+ * <h2>Teststrategie:</h2>
+ * <ul>
+ *   <li>Verwendung von {@code Mockito} zur Simulation von Repository-Abhängigkeiten</li>
+ *   <li>Kein Spring-Kontext oder echte Datenbankverbindungen</li>
+ * </ul>
+ */
+
 public class UserServiceTest {
 
     private UserRepository userRepository;
