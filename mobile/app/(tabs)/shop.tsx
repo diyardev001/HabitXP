@@ -1,47 +1,78 @@
-import { StyleSheet, Text, View, Pressable, Dimensions, Image } from 'react-native';
+import { StyleSheet, Text, View, Pressable, Dimensions, Image, Alert } from 'react-native';
 import React, { useState } from 'react';
 import Container from '@/components/Container';
 import useTheme from '@/hooks/useTheme';
 import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { fetchBonuses } from "@/services/shopService";
+import { buyBonus } from "@/services/shopService";
+import { useUserData } from "@/hooks/useUserData";
+import { Bonus } from "@/types/bonus";
+import { useMutation, useQueryClient, useQuery } from "@tanstack/react-query";
 
 const coinIcon = require('../../assets/images/icons/gamification/coin.png');
 
-const offers = {
-  xp: [
-    { title: '1h XP Boost  ', price: 100 },
-    { title: '3h XP Boost  ', price: 250 },
-    { title: '12h XP Boost  ', price: 600 },
-    { title: '24h XP Boost  ', price: 1000 },
-  ],
-  skip: [
-    { title: '1x Skip Day  ', price: 150 },
-    { title: '3x Skip Days  ', price: 400 },
-    { title: '5x Skip Days  ', price: 600 },
-    { title: '10x Skip Days  ', price: 1000 },
-  ],
-  health: [
-    { title: '+5 Health  ', price: 100 },
-    { title: '+20 Health  ', price: 350 },
-    { title: '+35 Health  ', price: 600 },
-    { title: '+50 Health  ', price: 850 },
-  ],
-};
-
-const ShopTab = ({ items, colors }: { items: typeof offers.xp, colors: any }) => (
-  <View style={styles.tabContainer}>
-    {items.map((offer, index) => (
-      <Pressable key={index} style={[styles.offerCard, { backgroundColor: colors.card }]}>
-        <Text style={[styles.offerTitle, { color: colors.title }]}>{offer.title}</Text>
-        <Image source={coinIcon} style={styles.coinIcon}/>
-        <Text style={styles.offerPrice}>{offer.price}</Text>
-      </Pressable>
-    ))}
-  </View>
+const ShopTab = ({
+  items,
+  colors,
+  userData,
+  mutation,
+}: {
+  items: Bonus[];
+  colors: any;
+  userData: any;
+  mutation: any;
+}) => (
+    <View style={styles.tabContainer}>
+      {items.map((offer) => (
+        <Pressable
+          key={offer.id}
+          style={[styles.offerCard, { backgroundColor: colors.card }]}
+          onPress={() => {
+            if (!userData) return;
+            if (userData.coins < offer.cost) {
+              Alert.alert("Nicht genug Coins", "Du hast nicht genügend Coins für diesen Bonus.");
+              return;
+            }
+            mutation.mutate(offer);
+          }}
+        >
+          <Text style={[styles.offerTitle, { color: colors.title }]}>{offer.name}</Text>
+          <Image source={coinIcon} style={styles.coinIcon} />
+          <Text style={styles.offerPrice}>{offer.cost}</Text>
+        </Pressable>
+      ))}
+    </View>
 );
 
 const Shop = () => {
   const colors = useTheme();
   const layout = Dimensions.get('window');
+  const { data: userData } = useUserData();
+  const queryClient = useQueryClient();
+
+const { data: allBonuses = [], isLoading } = useQuery({
+  queryKey: ["bonuses"],
+  queryFn: fetchBonuses,
+});
+
+const xpBonuses = allBonuses.filter(b => b.type === "XP_BOOST");
+const healthBonuses = allBonuses.filter(b => b.type === "HEALTH");
+const streakBonuses = allBonuses.filter(b => b.type === "StreakFreeze");
+
+
+  const mutation = useMutation({x
+    mutationFn: (bonus: Bonus) => {
+      if (!userData) throw new Error("User nicht geladen");
+      return buyBonus(bonus.id, userData.id);
+    },
+    onSuccess: (message) => {
+      Alert.alert("Erfolg", message);
+      queryClient.invalidateQueries({ queryKey: ["userData", userData?.id] });
+    },
+    onError: (err: any) => {
+      Alert.alert("Fehlgeschlagen", err.message || "Unbekannter Fehler beim Kauf.");
+    },
+  });
 
   const [index, setIndex] = useState(0);
   const [routes] = useState([
@@ -50,11 +81,11 @@ const Shop = () => {
     { key: 'health', title: 'Health' },
   ]);
 
-  const renderScene = SceneMap({
-    xp: () => <ShopTab items={offers.xp} colors={colors} />,
-    skip: () => <ShopTab items={offers.skip} colors={colors} />,
-    health: () => <ShopTab items={offers.health} colors={colors} />,
-  });
+const renderScene = SceneMap({
+      xp: () => <ShopTab items={xpBonuses} colors={colors} />,
+      skip: () => <ShopTab items={streakBonuses} colors={colors} />,
+      health: () => <ShopTab items={healthBonuses} colors={colors} />,
+});
 
   return (
     <Container>
@@ -95,8 +126,7 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   offerCard: {
-         flexDirection: 'row',
-         //height: '10000'
+    flexDirection: 'row',
     borderRadius: 16,
     padding: 20,
     marginBottom: 15,
@@ -113,8 +143,8 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
   coinIcon: {
-      width: 22,
-     height: 22,
-     marginRight: 8,
+    width: 22,
+    height: 22,
+    marginRight: 8,
   },
 });
