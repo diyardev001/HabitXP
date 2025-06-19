@@ -8,6 +8,9 @@ import java.util.Random;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+
+import com.habitxp.backend.dto.BonusBuyResponse;
+import com.habitxp.backend.dto.CompletionResponse;
 import com.habitxp.backend.model.User;
 
 
@@ -30,16 +33,16 @@ public class Bonus {
         return userCoins >= cost;
     }
 
-    public int applyTo(User user) {
+    public BonusBuyResponse applyTo(User user) {
         switch (type) {
             case XP_BOOST -> {
                 if(!user.isXpBonusActive()){
                     user.setXpFactor(reward);
                     user.setXpFactorUntil(Instant.now().plus(Duration.ofHours(duration)));
                     user.setXpBonusActive(true);
-                    return reward;
+                    return new BonusBuyResponse(true,false);
                 }else{
-                    return 0;
+                    return new BonusBuyResponse(false,true);
                 }
             }
             case HEALTH -> {
@@ -49,15 +52,15 @@ public class Bonus {
                         user.setHealth(user.getMaxHealth());
                     }
                 }
-                return reward;
+                return new BonusBuyResponse(true,false);
             }
             case StreakFreeze -> {
                 if(!user.isStreakFreezeActive()){
                     user.setStreakFreezeActive(true);
                     user.setStreakFreezeUntil(Instant.now().plus(Duration.ofHours(duration)));
-                    return duration;
+                    return new BonusBuyResponse(true,false);
                 }else{
-                    return 0;
+                    return new BonusBuyResponse(false,true);
                 }
             }
 
