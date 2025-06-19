@@ -78,16 +78,25 @@ public class TaskService {
         Task task = getTaskById(taskId);
         User user = getUserById(userId);
 
+        //levelup überprüfen
         boolean success = task.markAsCompleted(user);
         taskRepository.save(task);
 
+
+        int level=user.getLevel();
+        boolean levelup=false;
         if (success) {
             applyRewardsToUser(user, task);
+        }
+        user=getUserById(userId);
+        if(user.getLevel()>level){
+            levelup=true;
         }
 
         return new CompletionResponse(
                 success,
                 task.isCompleted(),
+                levelup,
                 task.remainingCompletions(),
                 task.getRewardXP(),
                 task.getRewardCoins()
@@ -113,7 +122,6 @@ public class TaskService {
     private void applyRewardsToUser(User user, Task task) {
         user.addXP(task.getRewardXP());
         user.setCoins(user.getCoins() + task.getRewardCoins());
-        user.xpFactorReset();
 
         List<Task> userTasks = taskRepository.findByUserId(user.getId());
         Frequency lowestFrequency = determineLowestFrequency(userTasks);

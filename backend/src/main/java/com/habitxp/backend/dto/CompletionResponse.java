@@ -8,6 +8,7 @@ import lombok.Data;
 public class CompletionResponse {
     private boolean success;
     private boolean isCompleted;
+    private boolean levelup;
     private int remaining;
     private int rewardXP;
     private int rewardCoins;

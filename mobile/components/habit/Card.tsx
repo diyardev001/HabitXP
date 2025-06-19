@@ -49,6 +49,13 @@ export default function Card({
         try {
             const response = await completeTask(id);
             if (response.completed) {
+                if(response.levelup){
+                    setRewards([
+                        {label: "XP", value: response.rewardXP},
+                        {label: "Coins", value: response.rewardCoins},
+                    ]);
+                    setShowModal(true);
+                }
                 await queryClient.invalidateQueries({queryKey: ['tasks']});
                 await queryClient.invalidateQueries({queryKey: ['userData']});
                 setRewards([

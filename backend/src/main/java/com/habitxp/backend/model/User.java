@@ -122,13 +122,13 @@ public class User {
     public void levelup() {
         if (this.healthOption) {
             this.maxHealth += 2;
-            this.health = maxHealth;
             this.healthOption=false;
 
         } else if (this.taskLimitOption) {
             taskLimit += 1;
             this.taskLimitOption=false;
         }
+        this.health = maxHealth;
     }
 
     public void coinPenalty() {
