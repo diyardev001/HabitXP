@@ -1,4 +1,4 @@
-import {Alert, Dimensions, Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Dimensions, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import Container from '@/components/Container';
 import useTheme from '@/hooks/useTheme';
@@ -7,19 +7,22 @@ import {buyBonus, fetchBonuses} from "@/services/shopService";
 import {useUserData} from "@/hooks/useUserData";
 import {Bonus} from "@/types/bonus";
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import NotEnoughCoinsModal from "@/components/shop/NotEnoughCoinsModal";
 
 const coinIcon = require('../../assets/images/icons/gamification/coin.png');
 
 const ShopTab = ({
-                     items,
-                     colors,
-                     userData,
-                     mutation,
-                 }: {
+    items,
+    colors,
+    userData,
+    mutation,
+    setShowCoinsModal,
+}: {
     items: Bonus[];
     colors: any;
     userData: any;
     mutation: any;
+    setShowCoinsModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => (
     <View style={styles.tabContainer}>
         {items.map((offer) => (
@@ -29,7 +32,7 @@ const ShopTab = ({
                 onPress={() => {
                     if (!userData) return;
                     if (userData.coins < offer.cost) {
-                        Alert.alert("Nicht genug Coins", "Du hast nicht genügend Coins für diesen Bonus.");
+                        setShowCoinsModal(true);
                         return;
                     }
                     mutation.mutate(offer);
@@ -73,6 +76,8 @@ const Shop = () => {
         },
     });
 
+    const [showCoinsModal, setShowCoinsModal] = useState(false);
+
     const [index, setIndex] = useState(0);
     const [routes] = useState([
         {key: 'xp', title: 'XP Boosts'},
@@ -81,9 +86,9 @@ const Shop = () => {
     ]);
 
     const renderScene = SceneMap({
-        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} mutation={mutation}/>,
-        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData} mutation={mutation}/>,
-        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData} mutation={mutation}/>,
+        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
+        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
+        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
     });
 
     return (
@@ -104,6 +109,10 @@ const Shop = () => {
                     />
                 )}
             />
+            <NotEnoughCoinsModal
+                            visible={showCoinsModal}
+                            onClose={() => setShowCoinsModal(false)}
+                        />
         </Container>
     );
 };
