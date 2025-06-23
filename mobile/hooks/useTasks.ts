@@ -13,9 +13,11 @@ export function useTasks() {
             return data.map(task => ({
                 ...task,
                 completionsCount: task.completions.length,
-                isCompleted: task.completions.length >= task.times
+                isCompleted: task.completed
             }));
         },
         enabled: !!userId,
+        refetchOnWindowFocus: true,
+        refetchInterval: 5 * 60 * 1000
     });
 }
