@@ -14,5 +14,5 @@ export type Task = NewTask & {
     id: string;
     completions: string[];
     completionsCount: number;
-    isCompleted: boolean;
+    completed: boolean;
 }

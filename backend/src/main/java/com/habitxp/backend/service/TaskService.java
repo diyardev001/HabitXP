@@ -41,8 +41,12 @@ public class TaskService {
     }
 
     public Task getTaskById(String id) {
-        return taskRepository.findById(id)
+        Task task = taskRepository.findById(id)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        task.updateCompletionStatus();
+        taskRepository.save(task);
+        return task;
     }
 
     public Task createTask(Task task) {
@@ -82,15 +86,14 @@ public class TaskService {
         boolean success = task.markAsCompleted(user);
         taskRepository.save(task);
 
-
-        int level=user.getLevel();
-        boolean levelup=false;
+        int level = user.getLevel();
+        boolean levelup = false;
         if (success) {
             applyRewardsToUser(user, task);
         }
-        user=getUserById(userId);
-        if(user.getLevel()>level){
-            levelup=true;
+        user = getUserById(userId);
+        if (user.getLevel() > level) {
+            levelup = true;
         }
 
         return new CompletionResponse(
@@ -130,15 +133,23 @@ public class TaskService {
             user.setStreak(user.getStreak() + 1);
             user.setLastStreakUpdate(LocalDate.now());
         }
-        
+
         userRepository.save(user);
     }
 
     private Frequency determineLowestFrequency(List<Task> tasks) {
         return tasks.stream()
                 .map(Task::getFrequency)
+                .filter(f -> {
+                    try {
+                        FrequencyOrder.valueOf(f.name());
+                        return true;
+                    } catch (IllegalArgumentException e) {
+                        return false;
+                    }
+                })
                 .min(Comparator.comparingInt(f -> FrequencyOrder.valueOf(f.name()).getOrder()))
-                .orElse(Frequency.DAILY); // Default fallback
+                .orElse(Frequency.DAILY);
     }
 
     private boolean hasAlreadyCountedStreak(User user, Frequency lowestFrequency, List<Task> tasks) {

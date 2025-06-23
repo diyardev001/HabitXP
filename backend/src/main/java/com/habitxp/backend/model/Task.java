@@ -84,7 +84,6 @@ public class Task {
                 .durationMinutes(durationMinutes)
                 .build());
 
-
         if (isPeriodCompleted()) {
             this.isCompleted = true;
             //Updates

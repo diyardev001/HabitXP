@@ -24,8 +24,8 @@ export default function List() {
         const filtered = filterByFrequency ? habits.filter(filterByFrequency) : habits;
 
         return [...filtered].sort((a, b) => {
-            if (a.isCompleted !== b.isCompleted) {
-                return a.isCompleted ? 1 : -1;
+            if (a.completed !== b.completed) {
+                return a.completed ? 1 : -1;
             }
             const titleComparison = a.title.localeCompare(b.title);
             if (titleComparison !== 0) {
@@ -85,7 +85,7 @@ export default function List() {
                     const durationUnit = match?.[2] === "h" ? "HOURS" : "MINUTES";
 
                     let showCompletedDivider = false;
-                    if (item.isCompleted && !hasShownCompletedDivider) {
+                    if (item.completed && !hasShownCompletedDivider) {
                         showCompletedDivider = true;
                         hasShownCompletedDivider = true;
                     }
@@ -107,7 +107,7 @@ export default function List() {
                                 durationUnit={durationUnit}
                                 times={item.times}
                                 frequency={item.frequency}
-                                done={item.isCompleted}
+                                done={item.completed}
                                 colorKey={item.colorKey}
                                 completionsCount={item.completionsCount}
                             />
