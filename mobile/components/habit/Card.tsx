@@ -6,8 +6,8 @@ import {Colors} from "@/constants/Colors";
 import RewardModal from "@/components/RewardModal";
 import {RewardItem} from "@/types/reward";
 import {queryClient} from '@/lib/queryClient';
-import { selectLevelUpBonus } from '@/services/userService';
-import { useUserData } from "@/hooks/useUserData";
+import {selectLevelUpBonus} from '@/services/userService';
+import {useUserData} from "@/hooks/useUserData";
 import LevelUpModal from '../LevelUpModal';
 
 
@@ -43,20 +43,18 @@ export default function Card({
     const [showModal, setShowModal] = useState(false);
     const [showLevelUpModal, setShowLevelUpModal] = useState(false);
 
-    const { data: userData } = useUserData();
-
+    const {data: userData} = useUserData();
 
     const handleLevelUpChoice = async (choice: "HEALTH" | "TASK_LIMIT") => {
-    try {
-        if (!userData?.id) return;
-        await selectLevelUpBonus(userData.id, choice);
-        setShowLevelUpModal(false);
-        await queryClient.invalidateQueries({ queryKey: ['userData'] });
-    } catch (error) {
-        console.error("Fehler beim Anwenden der Belohnung:", error);
-    }
+        try {
+            if (!userData?.id) return;
+            await selectLevelUpBonus(userData.id, choice);
+            setShowLevelUpModal(false);
+            await queryClient.invalidateQueries({queryKey: ['userData']});
+        } catch (error) {
+            console.error("Fehler beim Anwenden der Belohnung:", error);
+        }
     };
-
 
     const [rewards, setRewards] = useState<RewardItem[]>([]);
 
@@ -70,7 +68,7 @@ export default function Card({
         try {
             const response = await completeTask(id);
             if (response.completed) {
-                if(response.levelup){
+                if (response.levelup) {
                     setShowLevelUpModal(true);
                 }
                 await queryClient.invalidateQueries({queryKey: ['tasks']});
