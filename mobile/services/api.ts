@@ -39,7 +39,8 @@ api.interceptors.response.use(
     async (error) => {
         const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !originalRequest._retry) {
+        const isAuthEndpoint = originalRequest?.url?.includes("/auth/login") || originalRequest?.url?.includes("/auth/register");
+        if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
             originalRequest._retry = true;
 
             if (isRefreshing) {
@@ -57,7 +58,7 @@ api.interceptors.response.use(
 
             try {
                 const refreshToken = await SecureStore.getItemAsync('refreshToken');
-                if (!refreshToken) throw new Error("Kein Refresh Token vorhanden");
+                if (!refreshToken) throw new Error("Deine Sitzung ist abgelaufen. Bitte logge dich erneut ein.");
 
                 const res = await axios.post(`${Constants.expoConfig?.extra?.API_URL}/auth/refresh`, {
                     refreshToken,

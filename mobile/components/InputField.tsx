@@ -14,6 +14,7 @@ type Props = {
     keyboardType?: KeyboardTypeOptions;
     error?: string;
     editable?: boolean;
+    onBlur?: () => void;
 };
 
 export default function InputField({
@@ -26,7 +27,8 @@ export default function InputField({
                                        style,
                                        keyboardType,
                                        error,
-                                       editable
+                                       editable,
+                                       onBlur
                                    }: Readonly<Props>) {
     const colors = useTheme();
     const [isSecure, setIsSecure] = useState(!!secureTextEntry);
@@ -60,6 +62,7 @@ export default function InputField({
                     secureTextEntry={isSecure}
                     keyboardType={keyboardType}
                     editable={editable}
+                    onBlur={onBlur}
                 />
 
                 {secureTextEntry && (
