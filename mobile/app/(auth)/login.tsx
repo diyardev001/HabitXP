@@ -11,24 +11,42 @@ import PrimaryButton from "@/components/PrimaryButton";
 import {ROUTES} from "@/routes";
 import InputField from "@/components/InputField";
 import useTheme from "@/hooks/useTheme";
-import {isNotEmpty} from "@/utils/validators";
+import {isNotEmpty, isValidEmail, validateLoginField} from "@/utils/validators";
 
 export default function Login() {
     const {login} = useAuth();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [errors, setErrors] = useState<{ email?: string; password?: string; server?: string }>({});
+    const [touched, setTouched] = useState<{ email: boolean; password: boolean }>({email: false, password: false});
     const [loading, setLoading] = useState(false);
     const colors = useTheme();
 
+    const getFieldError = (field: "email" | "password") =>
+        touched[field] ? errors[field] : undefined;
+
+    const handleChange = (field: "email" | "password", value: string) => {
+        if (field === "email") setEmail(value);
+        if (field === "password") setPassword(value);
+
+        if (errors[field] || errors.server) {
+            setErrors(prev => ({...prev, [field]: undefined, server: undefined}));
+        }
+    };
+
+    const handleBlur = (field: "email" | "password", value: string) => {
+        setTouched(prev => ({...prev, [field]: true}));
+        const error = validateLoginField(field, value);
+        setErrors(prev => ({...prev, [field]: error}));
+    };
+
     const handleLogin = async () => {
-        const newErrors: typeof errors = {};
+        const emailError = validateLoginField("email", email);
+        const passwordError = validateLoginField("password", password);
 
-        if (!isNotEmpty(email)) newErrors.email = "Bitte Email eingeben";
-        if (!isNotEmpty(password)) newErrors.password = "Bitte Passwort eingeben";
-
-        if (Object.keys(newErrors).length > 0) {
-            setErrors(newErrors);
+        if (emailError || passwordError) {
+            setErrors({email: emailError, password: passwordError});
+            setTouched({email: true, password: true});
             return;
         }
 
@@ -38,11 +56,17 @@ export default function Login() {
         try {
             await login(email, password);
         } catch (err: any) {
-            setErrors({server: err.response?.data?.message || "Login fehlgeschlagen"});
+            const isUnauthorized = err?.response?.status === 401;
+            const message = isUnauthorized
+                ? "Ungültige E-Mail oder Passwort"
+                : "Login fehlgeschlagen. Bitte überprüfe deine Eingaben";
+            setErrors({server: message});
         } finally {
             setLoading(false);
         }
     };
+
+    const canSubmit = isValidEmail(email) && isNotEmpty(password);
 
     return (
         <KeyboardAwareScrollView
@@ -60,23 +84,30 @@ export default function Login() {
                         label={"Email"}
                         icon={"mail-outline"}
                         value={email}
-                        onChangeText={setEmail}
+                        onChangeText={(text) => handleChange("email", text)}
+                        onBlur={() => handleBlur("email", email)}
                         placeholder={"Email"}
-                        error={errors.email}
+                        error={getFieldError("email")}
                     />
                     <InputField
                         label={"Passwort"}
                         icon={"lock-closed-outline"}
                         value={password}
-                        onChangeText={setPassword}
+                        onChangeText={(text) => handleChange("password", text)}
+                        onBlur={() => handleBlur("password", password)}
                         placeholder={"Passwort"}
                         secureTextEntry={true}
-                        error={errors.password}
+                        error={getFieldError("password")}
                     />
 
                     {errors.server && <NormalText style={styles.serverError}>{errors.server}</NormalText>}
 
-                    <PrimaryButton title={"Einloggen"} onPress={handleLogin} loading={loading}/>
+                    <PrimaryButton
+                        title={"Einloggen"}
+                        onPress={handleLogin}
+                        loading={loading}
+                        disabled={!canSubmit || loading}
+                    />
 
                     <TouchableOpacity onPress={() => router.replace(ROUTES.REGISTER)}>
                         <NormalText style={styles.signUpLink}>

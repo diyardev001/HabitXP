@@ -5,13 +5,16 @@ type PrimaryButtonProps = {
     title: string;
     loading?: boolean;
     onPress: (event: GestureResponderEvent) => void;
+    disabled?: boolean
 };
 
-export default function PrimaryButton({title, loading = false, onPress}: Readonly<PrimaryButtonProps>) {
+export default function PrimaryButton({title, loading = false, onPress, disabled}: Readonly<PrimaryButtonProps>) {
     const colors = useTheme();
 
     return (
-        <TouchableOpacity style={[styles.button, {backgroundColor: colors.primary}]} onPress={onPress}>
+        <TouchableOpacity style={[styles.button, {backgroundColor: colors.primary, opacity: disabled ? 0.6 : 1}]}
+                          onPress={onPress}
+                          disabled={disabled}>
             {loading ? (
                 <ActivityIndicator color={colors.title}/>
             ) : (
