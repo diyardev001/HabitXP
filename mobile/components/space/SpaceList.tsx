@@ -2,7 +2,7 @@ import {ScrollView, StyleSheet, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import SpaceCard from './SpaceCard';
 import {Colors} from '@/constants/Colors';
-import CreateSpaceModal from './CreateSpaceModal';
+import CreateSpaceModal from '../Modals/CreateSpaceModal';
 
 interface SpaceListProps {
     shouldShowModal?: boolean;
