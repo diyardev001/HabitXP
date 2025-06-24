@@ -13,6 +13,7 @@ type Props = {
     style?: object;
     keyboardType?: KeyboardTypeOptions;
     error?: string;
+    editable?: boolean;
 };
 
 export default function InputField({
@@ -24,7 +25,8 @@ export default function InputField({
                                        secureTextEntry,
                                        style,
                                        keyboardType,
-                                       error
+                                       error,
+                                       editable
                                    }: Readonly<Props>) {
     const colors = useTheme();
     const [isSecure, setIsSecure] = useState(!!secureTextEntry);
@@ -38,7 +40,11 @@ export default function InputField({
 
             <View style={[
                 styles.inputWrapper,
-                {backgroundColor: colors.inputBackground, paddingLeft: icon ? 10 : 14}
+                {
+                    backgroundColor: colors.inputBackground,
+                    paddingLeft: icon ? 10 : 14,
+                    opacity: editable === false ? 0.4 : 1
+                }
             ]}>
                 {/* Icon nur anzeigen, wenn vorhanden */}
                 {icon && (
@@ -53,6 +59,7 @@ export default function InputField({
                     onChangeText={onChangeText}
                     secureTextEntry={isSecure}
                     keyboardType={keyboardType}
+                    editable={editable}
                 />
 
                 {secureTextEntry && (

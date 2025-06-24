@@ -4,7 +4,7 @@ import {UserData} from "@/types/user";
 import {Ionicons} from "@expo/vector-icons";
 import ProgressBar from "@/components/Gamification/ProgressBar";
 import StatIndicator from "@/components/Gamification/StatIndicator";
-import RewardModal from "@/components/RewardModal";
+import RewardModal from "@/components/Modals/RewardModal";
 import {useRemainingTime} from "@/hooks/useRemainingTime";
 import {useTasks} from "@/hooks/useTasks";
 

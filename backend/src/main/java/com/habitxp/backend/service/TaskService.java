@@ -70,9 +70,19 @@ public class TaskService {
         return savedTask;
     }
 
-    public Task updateTask(Task task) {
-        return taskRepository.save(task);
+    public Task updateTask(Task updatedTask) {
+        Task existing = getTaskById(updatedTask.getId());
+
+        existing.setTitle(updatedTask.getTitle());
+        existing.setDuration(updatedTask.getDuration());
+        existing.setFrequency(updatedTask.getFrequency());
+        existing.setTimes(updatedTask.getTimes());
+        existing.setColorKey(updatedTask.getColorKey());
+        existing.setSpaceId(updatedTask.getSpaceId());
+
+        return taskRepository.save(existing);
     }
+
 
     public void deleteTask(String id) {
         taskRepository.deleteById(id);

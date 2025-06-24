@@ -4,7 +4,7 @@ import {StyleSheet, View} from 'react-native';
 import {ROUTES} from "@/routes";
 import {useUserData} from "@/hooks/useUserData";
 import {useState} from "react";
-import LimitReachedModal from "@/components/habit/LimitReachedModal";
+import LimitReachedModal from "@/components/Modals/LimitReachedModal";
 
 export default function TabsLayout() {
     const {data: userData, isLoading} = useUserData();
