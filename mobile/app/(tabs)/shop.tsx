@@ -6,41 +6,80 @@ import {SceneMap, TabBar, TabView} from 'react-native-tab-view';
 import {buyBonus, fetchBonuses} from "@/services/shopService";
 import {useUserData} from "@/hooks/useUserData";
 import {Bonus} from "@/types/bonus";
-import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
+import {useQuery, useQueryClient} from "@tanstack/react-query";
+import {Ionicons} from "@expo/vector-icons";
+import BonusAlreadyActiveModal from "@/components/shop/BonusAlreadyActiveModal";
 import NotEnoughCoinsModal from "@/components/shop/NotEnoughCoinsModal";
+import UnknownErrorModal from "@/components/shop/UnknownErrorModal";
 
 const coinIcon = require('../../assets/images/icons/gamification/coin.png');
+
+const getIconForBonusType = (type: string) => {
+    switch (type) {
+        case "HEALTH":
+            return <Ionicons name="heart" size={24} color="#e74c3c" />;
+        case "XP_BOOST":
+            return <Ionicons name="star" size={24} color="#f1c40f" />;
+        case "StreakFreeze":
+            return <Ionicons name="flame" size={24} color="#ff6c00" /> ;
+        default:
+            return null;
+    }
+};
 
 const ShopTab = ({
     items,
     colors,
     userData,
-    mutation,
     setShowCoinsModal,
+    setShowBonusAlreadyActiveModal,
+    setShowUnknownErrorModal
 }: {
     items: Bonus[];
     colors: any;
     userData: any;
-    mutation: any;
     setShowCoinsModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowBonusAlreadyActiveModal: React.Dispatch<React.SetStateAction<boolean>>;
+    setShowUnknownErrorModal: React.Dispatch<React.SetStateAction<boolean>>;
 }) => (
     <View style={styles.tabContainer}>
         {items.map((offer) => (
             <Pressable
                 key={offer.id}
                 style={[styles.offerCard, {backgroundColor: colors.card}]}
-                onPress={() => {
+                onPress={async () => {
                     if (!userData) return;
+
                     if (userData.coins < offer.cost) {
-                        setShowCoinsModal(true);
-                        return;
+                      setShowCoinsModal(true);
+                      return;
                     }
-                    mutation.mutate(offer);
-                }}
+
+                    try {
+                      const response = await buyBonus(offer.id, userData.id);
+
+                      Alert.alert("Erfolg", response);
+                      queryClient.invalidateQueries({ queryKey: ["userData", userData?.id] });
+                    } catch (err: any) {
+                      const message = err?.message || "";
+
+                      if (message.includes("Bonus mit selben Typ bereits aktiv")) {
+                        setShowBonusAlreadyActiveModal(true);
+                      } else {
+                        setShowUnknownErrorModal(true);
+                      }
+                    }
+                  }}
             >
-                <Text style={[styles.offerTitle, {color: colors.title}]}>{offer.name}</Text>
-                <Image source={coinIcon} style={styles.coinIcon}/>
-                <Text style={styles.offerPrice}>{offer.cost}</Text>
+                <View style={styles.offerContent}>
+                    <Text style={[styles.offerTitle, { color: colors.title }]}>
+                        {offer.name} {getIconForBonusType(offer.type)}
+                    </Text>
+                </View>
+                <View style={styles.offerFooter}>
+                    <Image source={coinIcon} style= {styles.coinIcon} />
+                    <Text style={styles.offerPrice}> {offer.cost} </Text>
+                </View>
             </Pressable>
         ))}
     </View>
@@ -62,38 +101,25 @@ const Shop = () => {
     const streakBonuses = allBonuses.filter(b => b.type === "StreakFreeze");
 
 
-    const mutation = useMutation({
-        mutationFn: (bonus: Bonus) => {
-            if (!userData) throw new Error("User nicht geladen");
-            return buyBonus(bonus.id, userData.id);
-        },
-        onSuccess: (message) => {
-            Alert.alert("Erfolg", message);
-            queryClient.invalidateQueries({queryKey: ["userData", userData?.id]});
-        },
-        onError: (err: any) => {
-            Alert.alert("Fehlgeschlagen", err.message || "Unbekannter Fehler beim Kauf.");
-        },
-    });
-
     const [showCoinsModal, setShowCoinsModal] = useState(false);
-
+    const [showBonusAlreadyActiveModal, setShowBonusAlreadyActiveModal] = useState(false);
+    const [showUnknownErrorModal, setShowUnknownErrorModal] = useState(false);
     const [index, setIndex] = useState(0);
     const [routes] = useState([
         {key: 'xp', title: 'XP Boosts'},
-        {key: 'skip', title: 'Skip Days'},
+        {key: 'skip', title: 'Streak Freeze'},
         {key: 'health', title: 'Health'},
     ]);
 
     const renderScene = SceneMap({
-        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
-        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
-        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData} mutation={mutation} setShowCoinsModal={setShowCoinsModal}/>,
+        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
+        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
+        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
     });
 
     return (
         <Container>
-            <Text style={[styles.title, {color: colors.title}]}>Shop</Text>
+            <Text style={[styles.title, {color: colors.title}]}>Shop <Ionicons name="pricetag-outline" size={22}/> </Text>
             <TabView
                 navigationState={{index, routes}}
                 renderScene={renderScene}
@@ -110,9 +136,17 @@ const Shop = () => {
                 )}
             />
             <NotEnoughCoinsModal
-                            visible={showCoinsModal}
-                            onClose={() => setShowCoinsModal(false)}
-                        />
+              visible={showCoinsModal}
+              onClose={() => setShowCoinsModal(false)}
+            />
+            <BonusAlreadyActiveModal
+              visible={showBonusAlreadyActiveModal}
+              onClose={() => setShowBonusAlreadyActiveModal(false)}
+            />
+            <UnknownErrorModal
+              visible={showUnknownErrorModal}
+              onClose={() => setShowUnknownErrorModal(false)}
+            />
         </Container>
     );
 };
@@ -133,19 +167,30 @@ const styles = StyleSheet.create({
         marginTop: 20,
     },
     offerCard: {
-        flexDirection: 'row',
         borderRadius: 16,
-        padding: 20,
         marginBottom: 15,
         borderWidth: 1,
         borderColor: '#ccc',
+        overflow: 'hidden',
+    },
+    offerContent: {
+        padding: 20,
+        justifyContent: 'center',
+    },
+    offerFooter: {
+        flexDirection: 'row',
+        alignItems: 'center',
+        justifyContent: 'center',
+        paddingVertical: 10,
+        backgroundColor: '#2c2a37',
+        borderBottomLeftRadius: 16,
+        borderBottomRightRadius: 16,
     },
     offerTitle: {
-        fontSize: 20,
-        marginBottom: 8,
+        fontSize: 22,
     },
     offerPrice: {
-        color: '#FFD700',
+        color: '#efd632',
         fontSize: 18,
         fontWeight: 'bold',
     },
