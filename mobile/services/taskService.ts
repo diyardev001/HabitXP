@@ -40,9 +40,9 @@ export const getTaskById = async (id: string) => {
     }
 };
 
-export const updateTask = async (task: Task) => {
+export const updateTask = async (id: string, task: Partial<Task>) => {
     try {
-        const res = await api.put(`/tasks/${task.id}`, task);
+        const res = await api.put(`/tasks/${id}`, task);
         return res.data;
     } catch (err) {
         console.error(`Fehler beim Aktualisieren des Tasks mit ID ${task.id}:`, err);
