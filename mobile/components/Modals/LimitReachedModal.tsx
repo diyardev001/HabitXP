@@ -10,7 +10,7 @@ export default function LimitReachedModal({visible, onClose}: Readonly<LimitReac
     const theme = Colors["dark"];
 
     return (
-        <Modal transparent={true} animationType="fade" visible={visible}>
+        <Modal transparent={true} animationType="fade" visible={visible} statusBarTranslucent={true}>
             <View style={styles.modalBackground}>
                 <View style={[styles.modalContent, {backgroundColor: theme.background}]}>
                     <Text style={[styles.modalTitle, {color: theme.title}]}>Limit erreicht</Text>

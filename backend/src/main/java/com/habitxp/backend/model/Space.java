@@ -22,7 +22,7 @@ public class Space {
     private String userId;
 
     private String name;
-    private String color;
+    private String colorKey;
 
     @Builder.Default
     private List<String> taskIds = new ArrayList<>();

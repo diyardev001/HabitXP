@@ -49,24 +49,15 @@ public class User {
 
     private int taskLimit;
 
-    private List<String> spaceIds;
     private List<String> bonusIds;
 
     private List<String> avatars;
     private List<String> banner;
 
-    public void addSpace(String spaceId) {
-        this.spaceIds.add(spaceId);
-    }
-
-    public void removeSpace(String spaceId) {
-        this.spaceIds.remove(spaceId);
-    }
-
     public void addXP(int baseXP) {
         int gainedXP = baseXP * xpFactor;
         this.xp += gainedXP;
-        
+
         calculateLevel();
         calculateCurrentXP();
         calculateXPGoal();
@@ -79,7 +70,7 @@ public class User {
             xpSum += Math.round(100 * Math.pow(1.2, tempLevel));
             tempLevel++;
         }
-        this.level=tempLevel;
+        this.level = tempLevel;
         return tempLevel;
     }
 

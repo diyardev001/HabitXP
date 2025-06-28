@@ -1,4 +1,3 @@
-import {Colors} from "@/constants/Colors";
 import {Completion} from "@/types/completion";
 
 export type Frequency = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'NONE';
@@ -9,7 +8,6 @@ export type NewTask = {
     duration: string;
     frequency: Frequency;
     times: number;
-    colorKey: keyof typeof Colors.habit;
     spaceId: string;
 }
 

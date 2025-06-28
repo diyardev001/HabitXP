@@ -2,7 +2,6 @@ package com.habitxp.backend.unit;
 
 import com.habitxp.backend.dto.UserProfileResponse;
 import com.habitxp.backend.model.Frequency;
-import com.habitxp.backend.model.Space;
 import com.habitxp.backend.model.Task;
 import com.habitxp.backend.model.User;
 import com.habitxp.backend.repository.TaskRepository;
@@ -11,19 +10,15 @@ import com.habitxp.backend.service.TaskService;
 import com.habitxp.backend.service.UserService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.ArgumentCaptor;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.io.Console;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 /**
@@ -155,19 +150,6 @@ public class UserServiceTest {
     }
 
     @Test
-    void shouldReturnUserFromSpace() {
-        User user = new User();
-        user.setId("user123");
-        Space space = new Space();
-        space.setUserId("user123");
-
-        when(userRepository.findById("user123")).thenReturn(Optional.of(user));
-
-        Optional<User> result = userService.getUserFromSpace(space);
-        assertThat(result).contains(user);
-    }
-
-    @Test
     void shouldReturnUserProfile() {
         User user = User.builder()
                 .id("user123")
@@ -195,21 +177,5 @@ public class UserServiceTest {
         assertThat(profile.getUsername()).isEqualTo("testuser");
         assertThat(profile.getCurrentTasks()).isEqualTo(5);
         assertThat(profile.getAvatars()).contains("avatar1", "avatar2");
-    }
-
-    @Test
-    void shouldAddSpaceId() {
-        User user = User.builder().id("user123").spaceIds(new ArrayList<>()).build();
-
-        when(userRepository.findById("user123")).thenReturn(Optional.of(user));
-        when(userRepository.save(any(User.class))).thenReturn(user);
-
-        userService.addSpaceId("user123", "space456");
-
-        ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
-        verify(userRepository).save(captor.capture());
-
-        User savedUser = captor.getValue();
-        assertThat(savedUser.getSpaceIds()).contains("space456");
     }
 }

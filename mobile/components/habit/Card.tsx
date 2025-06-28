@@ -10,8 +10,8 @@ import {selectLevelUpBonus} from '@/services/userService';
 import {useUserData} from "@/hooks/useUserData";
 import LevelUpModal from '../Modals/LevelUpModal';
 import DeleteModal from "@/components/Modals/DeleteModal";
+import OptionsDropdown from "@/components/OptionsDropdown";
 import {router} from "expo-router";
-
 
 interface CardProps {
     id: string;
@@ -21,8 +21,10 @@ interface CardProps {
     times: number;
     frequency: string;
     done: boolean;
-    colorKey: keyof typeof Colors.habit;
+    spaceColorKey: keyof typeof Colors.habit;
     completionsCount: number;
+    isDropdownOpen: boolean;
+    setDropdownOpen: (id: string | null) => void;
 }
 
 const frequencyMap: Record<string, string> = {
@@ -39,15 +41,14 @@ export default function Card({
                                  times,
                                  frequency,
                                  done,
-                                 colorKey,
-                                 completionsCount
+                                 spaceColorKey,
+                                 completionsCount,
+                                 isDropdownOpen,
+                                 setDropdownOpen,
                              }: Readonly<CardProps>) {
     const [showModal, setShowModal] = useState(false);
     const [showLevelUpModal, setShowLevelUpModal] = useState(false);
-    const [showOptions, setShowOptions] = useState(false);
-    const [showEditModal, setShowEditModal] = useState(false);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
-    const [selectedOption, setSelectedOption] = useState<string | null>(null);
 
     const {data: userData} = useUserData();
 
@@ -64,8 +65,7 @@ export default function Card({
 
     const [rewards, setRewards] = useState<RewardItem[]>([]);
 
-    const colors = Colors;
-    const colorSet = Colors.habit[colorKey];
+    const colorSet = Colors.habit[spaceColorKey];
     const backgroundColor = done ? colorSet.completed : colorSet.bg;
     const accentColor = done ? colorSet.completedAccent : colorSet.ac;
 
@@ -74,6 +74,7 @@ export default function Card({
 
         try {
             const response = await completeTask(id);
+            const effectiveXP = userData?.xpBonusActive ? response.rewardXP * userData.xpFactor : response.rewardXP;
             if (response.completed) {
                 if (response.levelup) {
                     setShowLevelUpModal(true);
@@ -81,7 +82,7 @@ export default function Card({
                 await queryClient.invalidateQueries({queryKey: ['tasks']});
                 await queryClient.invalidateQueries({queryKey: ['userData']});
                 setRewards([
-                    {label: "XP", value: response.rewardXP},
+                    {label: "XP", value: effectiveXP},
                     {label: "Coins", value: response.rewardCoins},
                 ]);
                 setShowModal(true);
@@ -91,17 +92,11 @@ export default function Card({
         }
     };
 
-    const handleOptionPress = (option: string, callback: () => void) => {
-        setSelectedOption(option);
-        setShowOptions(false);
-        setTimeout(() => setSelectedOption(null), 300);
-        callback();
-    };
-
     const handleDelete = async () => {
         try {
             await deleteTask(id);
             await queryClient.invalidateQueries({queryKey: ['tasks']});
+            await queryClient.invalidateQueries({queryKey: ['userData']});
             setShowDeleteModal(false);
         } catch (err) {
             console.error("Fehler beim Löschen:", err);
@@ -109,7 +104,7 @@ export default function Card({
     };
 
     return (
-        <TouchableWithoutFeedback onPress={() => setShowOptions(false)}>
+        <TouchableWithoutFeedback onPress={() => setDropdownOpen(null)}>
             <View
                 style={[styles.container, {backgroundColor}]}>
                 <View>
@@ -123,32 +118,14 @@ export default function Card({
                             </Text>
                         </View>
 
-                        <View style={{position: 'relative'}}>
-                            <TouchableOpacity
-                                style={[styles.editButton, {backgroundColor: accentColor}]}
-                                onPress={() => setShowOptions(!showOptions)}
-                            >
-                                <Ionicons name="ellipsis-vertical" size={16} color="white"/>
-                            </TouchableOpacity>
+                        <OptionsDropdown
+                            accentColor={accentColor}
+                            onEdit={() => router.push(`/habit/${id}`)}
+                            onDelete={() => setShowDeleteModal(true)}
+                            isOpen={isDropdownOpen}
+                            setIsOpen={(open) => setDropdownOpen(open ? id : null)}
+                        />
 
-                            {showOptions && (
-                                <View style={[styles.dropdownMenu, {backgroundColor: accentColor}]}>
-                                    <TouchableOpacity
-                                        style={[styles.menuItem, selectedOption === 'edit' && styles.menuItemActive]}
-                                        onPress={() => handleOptionPress('edit', () => router.push(`/habit/${id}`)
-                                        )}
-                                    >
-                                        <Text style={styles.menuText}>Bearbeiten</Text>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity
-                                        style={[styles.menuItem, selectedOption === 'delete' && styles.menuItemActive]}
-                                        onPress={() => handleOptionPress('delete', () => setShowDeleteModal(true))}
-                                    >
-                                        <Text style={styles.menuText}>Löschen</Text>
-                                    </TouchableOpacity>
-                                </View>
-                            )}
-                        </View>
                     </View>
                     <View
                         style={{flexDirection: 'row', alignItems: 'center', marginTop: 10}}
@@ -194,6 +171,7 @@ export default function Card({
                 <DeleteModal
                     visible={showDeleteModal}
                     title={title}
+                    type="habit"
                     onConfirm={handleDelete}
                     onCancel={() => setShowDeleteModal(false)}
                 />

@@ -77,15 +77,24 @@ public class TaskService {
         existing.setDuration(updatedTask.getDuration());
         existing.setFrequency(updatedTask.getFrequency());
         existing.setTimes(updatedTask.getTimes());
-        existing.setColorKey(updatedTask.getColorKey());
         existing.setSpaceId(updatedTask.getSpaceId());
 
         return taskRepository.save(existing);
     }
 
 
-    public void deleteTask(String id) {
-        taskRepository.deleteById(id);
+    public void deleteTask(String taskId) {
+        Task task = taskRepository.findById(taskId)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Task not found"));
+
+        if (task.getSpaceId() != null) {
+            spaceRepository.findById(task.getSpaceId()).ifPresent(space -> {
+                space.removeTask(taskId);
+                spaceRepository.save(space);
+            });
+        }
+
+        taskRepository.deleteById(taskId);
     }
 
     public CompletionResponse completeTask(String taskId, String userId) {
@@ -122,8 +131,7 @@ public class TaskService {
 
         return new StatusResponse(
                 task.isCompleted(),
-                task.remainingCompletions(),
-                task.getColorKey()
+                task.remainingCompletions()
         );
     }
 

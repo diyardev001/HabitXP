@@ -5,23 +5,42 @@ import {Colors} from "@/constants/Colors";
 interface DeleteModalProps {
     visible: boolean;
     title: string;
+    type?: 'habit' | 'space';
+    affectedItems?: string[];
     onConfirm: () => void;
     onCancel: () => void;
 }
 
-export default function DeleteModal({visible, title, onConfirm, onCancel}: DeleteModalProps) {
+export default function DeleteModal({
+                                        visible,
+                                        title,
+                                        type,
+                                        affectedItems,
+                                        onConfirm,
+                                        onCancel
+                                    }: Readonly<DeleteModalProps>) {
     const colors = Colors.dark;
 
     return (
-        <Modal transparent animationType="fade" visible={visible}>
+        <Modal transparent animationType="fade" visible={visible} statusBarTranslucent={true}>
             <View style={styles.modalBackground}>
                 <View style={[styles.modalContent, {backgroundColor: colors.background}]}>
-                    <Text style={[styles.modalTitle, {color: colors.title}]}>Habit löschen?</Text>
+                    <Text
+                        style={[styles.modalTitle, {color: colors.title}]}>{type === 'space' ? 'Space löschen?' : 'Habit löschen?'}</Text>
                     <Text style={[styles.modalText, {color: colors.subtitle}]}>
                         Bist du dir sicher, dass du{'\n\n'}
                         <Text style={{fontWeight: 'bold'}}>{title}</Text>{'\n\n'}
                         löschen möchtest?
                     </Text>
+
+                    {type === 'space' && affectedItems && affectedItems.length > 0 && (
+                        <Text style={[styles.modalText, {color: colors.subtitle, marginTop: 10}]}>
+                            Die folgenden Habits werden ebenfalls gelöscht:
+                            {'\n\n'}
+                            {affectedItems.map(item => `• ${item}`).join('\n')}
+                        </Text>
+                    )}
+
                     <View style={styles.modalButtonRow}>
                         <TouchableOpacity
                             style={[styles.modalButton, {backgroundColor: 'crimson'}]}

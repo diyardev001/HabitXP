@@ -11,31 +11,31 @@ import {Ionicons} from "@expo/vector-icons";
 import BonusAlreadyActiveModal from "@/components/shop/BonusAlreadyActiveModal";
 import NotEnoughCoinsModal from "@/components/shop/NotEnoughCoinsModal";
 import UnknownErrorModal from "@/components/shop/UnknownErrorModal";
-import { queryClient } from '@/lib/queryClient';
+import {queryClient} from '@/lib/queryClient';
 
 const coinIcon = require('../../assets/images/icons/gamification/coin.png');
 
 const getIconForBonusType = (type: string) => {
     switch (type) {
         case "HEALTH":
-            return <Ionicons name="heart" size={24} color="#e74c3c" />;
+            return <Ionicons name="heart" size={24} color="#e74c3c"/>;
         case "XP_BOOST":
-            return <Ionicons name="star" size={24} color="#f1c40f" />;
+            return <Ionicons name="star" size={24} color="#f1c40f"/>;
         case "StreakFreeze":
-            return <Ionicons name="snow" size={24} color="#AEE5F9" /> ;
+            return <Ionicons name="snow" size={24} color="#AEE5F9"/>;
         default:
             return null;
     }
 };
 
 const ShopTab = ({
-    items,
-    colors,
-    userData,
-    setShowCoinsModal,
-    setShowBonusAlreadyActiveModal,
-    setShowUnknownErrorModal
-}: {
+                     items,
+                     colors,
+                     userData,
+                     setShowCoinsModal,
+                     setShowBonusAlreadyActiveModal,
+                     setShowUnknownErrorModal
+                 }: {
     items: Bonus[];
     colors: any;
     userData: any;
@@ -52,33 +52,33 @@ const ShopTab = ({
                     if (!userData) return;
 
                     if (userData.coins < offer.cost) {
-                      setShowCoinsModal(true);
-                      return;
+                        setShowCoinsModal(true);
+                        return;
                     }
 
                     try {
-                      const response = await buyBonus(offer.id, userData.id);
+                        const response = await buyBonus(offer.id, userData.id);
 
-                      Alert.alert("Erfolg", response);
-                      queryClient.invalidateQueries({ queryKey: ["userData", userData?.id] });
+                        Alert.alert("Erfolg", response);
+                        await queryClient.invalidateQueries({queryKey: ["userData"]});
                     } catch (err: any) {
-                      const message = err?.message || "";
+                        const message = err?.message || "";
 
-                      if (message.includes("Bonus mit selben Typ bereits aktiv")) {
-                        setShowBonusAlreadyActiveModal(true);
-                      } else {
-                        setShowUnknownErrorModal(true);
-                      }
+                        if (message.includes("Bonus mit selben Typ bereits aktiv")) {
+                            setShowBonusAlreadyActiveModal(true);
+                        } else {
+                            setShowUnknownErrorModal(true);
+                        }
                     }
-                  }}
+                }}
             >
                 <View style={styles.offerContent}>
-                    <Text style={[styles.offerTitle, { color: colors.title }]}>
+                    <Text style={[styles.offerTitle, {color: colors.title}]}>
                         {offer.name} {getIconForBonusType(offer.type)}
                     </Text>
                 </View>
                 <View style={styles.offerFooter}>
-                    <Image source={coinIcon} style= {styles.coinIcon} />
+                    <Image source={coinIcon} style={styles.coinIcon}/>
                     <Text style={styles.offerPrice}> {offer.cost} </Text>
                 </View>
             </Pressable>
@@ -113,14 +113,23 @@ const Shop = () => {
     ]);
 
     const renderScene = SceneMap({
-        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
-        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
-        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal} setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal} setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
+        xp: () => <ShopTab items={xpBonuses} colors={colors} userData={userData} setShowCoinsModal={setShowCoinsModal}
+                           setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal}
+                           setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
+        skip: () => <ShopTab items={streakBonuses} colors={colors} userData={userData}
+                             setShowCoinsModal={setShowCoinsModal}
+                             setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal}
+                             setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
+        health: () => <ShopTab items={healthBonuses} colors={colors} userData={userData}
+                               setShowCoinsModal={setShowCoinsModal}
+                               setShowBonusAlreadyActiveModal={setShowBonusAlreadyActiveModal}
+                               setShowUnknownErrorModal={setShowUnknownErrorModal}/>,
     });
 
     return (
         <Container>
-            <Text style={[styles.title, {color: colors.title}]}>Shop <Ionicons name="pricetag-outline" size={22}/> </Text>
+            <Text style={[styles.title, {color: colors.title}]}>Shop <Ionicons name="pricetag-outline" size={22}/>
+            </Text>
             <TabView
                 navigationState={{index, routes}}
                 renderScene={renderScene}
@@ -137,16 +146,16 @@ const Shop = () => {
                 )}
             />
             <NotEnoughCoinsModal
-              visible={showCoinsModal}
-              onClose={() => setShowCoinsModal(false)}
+                visible={showCoinsModal}
+                onClose={() => setShowCoinsModal(false)}
             />
             <BonusAlreadyActiveModal
-              visible={showBonusAlreadyActiveModal}
-              onClose={() => setShowBonusAlreadyActiveModal(false)}
+                visible={showBonusAlreadyActiveModal}
+                onClose={() => setShowBonusAlreadyActiveModal(false)}
             />
             <UnknownErrorModal
-              visible={showUnknownErrorModal}
-              onClose={() => setShowUnknownErrorModal(false)}
+                visible={showUnknownErrorModal}
+                onClose={() => setShowUnknownErrorModal(false)}
             />
         </Container>
     );

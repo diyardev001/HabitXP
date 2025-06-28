@@ -1,5 +1,4 @@
 import {useEffect, useRef, useState} from "react";
-import {Colors} from "@/constants/Colors";
 import {NewTask} from "@/types/task";
 
 export function useHabitForm(initialValues: Partial<NewTask> = {}) {
@@ -13,7 +12,6 @@ export function useHabitForm(initialValues: Partial<NewTask> = {}) {
         initialValues.duration?.includes("h") ? "HOURS" : "MINUTES"
     );
     const [space, setSpace] = useState(initialValues.spaceId || "");
-    const [selectedColorKey, setSelectedColorKey] = useState<keyof typeof Colors.habit | undefined>(initialValues.colorKey);
 
     useEffect(() => {
         if (initialized.current) return;
@@ -23,7 +21,6 @@ export function useHabitForm(initialValues: Partial<NewTask> = {}) {
         setDurationValue(initialValues.duration?.replace(/[^\d]/g, '') || "15");
         setDurationUnit(initialValues.duration?.includes("h") ? "HOURS" : "MINUTES");
         setSpace(initialValues.spaceId || "");
-        setSelectedColorKey(initialValues.colorKey);
         initialized.current = true;
     }, [initialValues]);
 
@@ -34,6 +31,5 @@ export function useHabitForm(initialValues: Partial<NewTask> = {}) {
         durationValue, setDurationValue,
         durationUnit, setDurationUnit,
         space, setSpace,
-        selectedColorKey, setSelectedColorKey
     };
 }

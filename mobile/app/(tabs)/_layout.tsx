@@ -1,23 +1,25 @@
 import {router, Tabs} from 'expo-router';
 import {Ionicons} from '@expo/vector-icons';
 import {StyleSheet, View} from 'react-native';
-import {ROUTES} from "@/routes";
 import {useUserData} from "@/hooks/useUserData";
 import {useState} from "react";
 import LimitReachedModal from "@/components/Modals/LimitReachedModal";
+import ActionChoiceModal from "@/components/Modals/ActionChoiceModal";
+import {ROUTES} from "@/routes";
+import CreateSpaceModal from "@/components/Modals/CreateSpaceModal";
+import {createSpace} from "@/services/spaceService";
+import {useSpaces} from "@/hooks/useSpaces";
 
 export default function TabsLayout() {
     const {data: userData, isLoading} = useUserData();
     const [limitModalVisible, setLimitModalVisible] = useState(false);
+    const [actionModalVisible, setActionModalVisible] = useState(false);
+    const [spaceModalVisible, setSpaceModalVisible] = useState(false);
+    const {data: spaces, refetch} = useSpaces();
 
     const handleAddPress = () => {
         if (!userData) return;
-
-        if (userData.currentTasks >= userData.taskLimit) {
-            setLimitModalVisible(true);
-        } else {
-            router.push(ROUTES.CREATE_HABIT);
-        }
+        setActionModalVisible(true)
     };
 
     return (
@@ -91,6 +93,34 @@ export default function TabsLayout() {
                     }}
                 />
             </Tabs>
+
+            <ActionChoiceModal
+                visible={actionModalVisible}
+                onClose={() => setActionModalVisible(false)}
+                onHabit={() => {
+                    setActionModalVisible(false);
+                    if (!userData) return;
+                    if (userData.currentTasks >= userData.taskLimit) {
+                        setLimitModalVisible(true);
+                    } else {
+                        router.push(ROUTES.CREATE_HABIT);
+                    }
+                }}
+                onSpace={() => {
+                    setActionModalVisible(false);
+                    setSpaceModalVisible(true);
+                }}
+            />
+
+            <CreateSpaceModal
+                isVisible={spaceModalVisible}
+                onClose={() => setSpaceModalVisible(false)}
+                existingSpaces={spaces || []}
+                onDone={async (name, colorKey) => {
+                    await createSpace({name, colorKey, userId: userData?.id!});
+                    await refetch();
+                }}
+            />
 
             <LimitReachedModal
                 visible={limitModalVisible}

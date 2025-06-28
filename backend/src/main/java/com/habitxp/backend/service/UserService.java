@@ -79,11 +79,4 @@ public class UserService {
                 user.getAvatars()
         );
     }
-
-    public void addSpaceId(String userId, String spaceId) {
-        userRepository.findById(userId).ifPresent(user -> {
-            user.getSpaceIds().add(spaceId);
-            userRepository.save(user);
-        });
-    }
 }

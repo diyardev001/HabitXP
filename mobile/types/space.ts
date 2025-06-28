@@ -1,9 +1,12 @@
-import {List} from "postcss/lib/list";
+import {Colors} from "@/constants/Colors";
 
-export type Space = {
-    id?: string;
+export type NewSpace = {
     userId: string;
     name: string;
-    taskIds: List;
-    color: string;
+    colorKey: keyof typeof Colors.habit;
+}
+
+export type Space = NewSpace & {
+    id: string;
+    taskIds: string[];
 }

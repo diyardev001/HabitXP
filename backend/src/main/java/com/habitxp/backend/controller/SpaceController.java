@@ -1,7 +1,7 @@
 package com.habitxp.backend.controller;
 
+import com.habitxp.backend.dto.UpdateSpaceRequest;
 import com.habitxp.backend.model.Space;
-import com.habitxp.backend.model.User;
 import com.habitxp.backend.service.SpaceService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -32,14 +32,15 @@ public class SpaceController {
     }
 
     @PostMapping
-    public ResponseEntity<Space> createSpace(@RequestBody Space space, String userID, Authentication auth) {
+    public ResponseEntity<Space> createSpace(@RequestBody Space space, Authentication auth) {
         space.setUserId(auth.getName());
-        return ResponseEntity.status(HttpStatus.CREATED).body(spaceService.createSpace(space, userID));
+        return ResponseEntity.status(HttpStatus.CREATED).body(spaceService.createSpace(space));
     }
 
-    @PutMapping
-    public ResponseEntity<Space> updateSpace(@RequestBody Space space) {
-        return ResponseEntity.ok(spaceService.updateSpace(space));
+    @PutMapping("/{id}")
+    public ResponseEntity<Space> updateSpace(@PathVariable String id, @RequestBody UpdateSpaceRequest updatedSpace) {
+        Space updated = spaceService.updateSpaceColorKey(id, updatedSpace);
+        return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")

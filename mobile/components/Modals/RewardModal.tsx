@@ -46,13 +46,7 @@ export default function RewardModal({
                     }).start();
                 });
             }
-
-            timer = setTimeout(() => {
-                onClose();
-            }, 4000); // Modal wird nach 4 Sekunden geschlossen
         }
-
-        return () => clearTimeout(timer);
     }, [visible, onClose, animationType]);
 
     const renderFlames = () => {
@@ -90,7 +84,7 @@ export default function RewardModal({
     };
 
     return (
-        <Modal transparent={true} animationType="fade" visible={visible}>
+        <Modal transparent={true} animationType="fade" visible={visible} statusBarTranslucent={true}>
             <View style={styles.modalBackground}>
                 <View style={[styles.modalContent, {backgroundColor: theme.background}]}>
                     <Text style={[styles.modalTitle, {color: theme.title}]}>{title}</Text>

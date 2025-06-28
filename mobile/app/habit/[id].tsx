@@ -25,7 +25,7 @@ export default function EditHabitScreen() {
     return (
         <HabitFormScreen
             initialValues={habit}
-            disabledFields={["title", "space"]}
+            disabledFields={["title"]}
             onSubmit={handleUpdate}
         />
     );

@@ -44,7 +44,6 @@ public class Task {
     private Frequency frequency;
 
     private String spaceId;
-    private String colorKey;
 
     @Builder.Default
     private List<Completion> completions = new ArrayList<>();

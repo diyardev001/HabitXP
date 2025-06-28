@@ -3,8 +3,8 @@ import {Pressable, StyleSheet, Text} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 import Container from "@/components/Container";
 import GamificationCard from "@/components/Gamification/GamificationCard";
-import { useUserData } from "@/hooks/useUserData";
-import { useRouter } from "expo-router";
+import {useUserData} from "@/hooks/useUserData";
+import {useRouter} from "expo-router";
 
 export default function AccountScreen() {
     const router = useRouter();
@@ -12,13 +12,13 @@ export default function AccountScreen() {
     const {data: userData, isLoading, isError} = useUserData();
 
     return (
-        <Container style={styles.container}>
+        <Container>
             {isLoading && <Text>Loading...</Text>}
             {isError && <Text>Fehler beim Laden der Daten</Text>}
-            {userData && <GamificationCard userData={userData} />}
+            {userData && <GamificationCard userData={userData}/>}
 
             <Pressable style={styles.buttonContainer} onPress={() => router.push('/settings')}>
-                <Ionicons name="settings-outline" size={24} color="white" />
+                <Ionicons name="settings-outline" size={24} color="white"/>
                 <Text style={styles.buttonText}>Einstellungen</Text>
             </Pressable>
 
@@ -31,11 +31,6 @@ export default function AccountScreen() {
 }
 
 const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        padding: 24,
-        justifyContent: "flex-start",
-    },
     logoutContainer: {
         flexDirection: "row",
         alignItems: "center",

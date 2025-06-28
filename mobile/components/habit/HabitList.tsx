@@ -4,11 +4,16 @@ import Card from '../habit/Card';
 import {Task} from "@/types/task";
 import useTheme from "@/hooks/useTheme";
 import {useTasks} from "@/hooks/useTasks";
+import {useSpaces} from "@/hooks/useSpaces";
+import {Colors} from "@/constants/Colors";
+import {Space} from "@/types/space";
 
 export default function List() {
     const colors = useTheme();
     const {data: habits = [], isLoading, isError} = useTasks();
+    const {data: spaces = []} = useSpaces();
     const [selectedIndex, setSelectedIndex] = useState(0);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
     const options = ['Alle', 'Heute', 'Woche', 'Monat'];
     let hasShownCompletedDivider = false;
 
@@ -84,6 +89,10 @@ export default function List() {
                     const durationValue = match?.[1] || "0";
                     const durationUnit = match?.[2] === "h" ? "HOURS" : "MINUTES";
 
+                    const space = spaces.find((s: Space) => s.id === item.spaceId);
+                    if (!space) return null;
+                    const spaceColorKey: keyof typeof Colors.habit = space.colorKey;
+
                     let showCompletedDivider = false;
                     if (item.completed && !hasShownCompletedDivider) {
                         showCompletedDivider = true;
@@ -108,8 +117,10 @@ export default function List() {
                                 times={item.times}
                                 frequency={item.frequency}
                                 done={item.completed}
-                                colorKey={item.colorKey}
+                                spaceColorKey={spaceColorKey}
                                 completionsCount={item.completionsCount}
+                                isDropdownOpen={openDropdownId === item.id}
+                                setDropdownOpen={setOpenDropdownId}
                             />
                         </>
                     );
@@ -133,9 +144,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 24,
         backgroundColor: '#f0f0f0',
         borderRadius: 5,
-    },
-    optionContainerSelected: {
-        backgroundColor: '#ffa29c',
     },
     optionText: {
         color: '#909396',

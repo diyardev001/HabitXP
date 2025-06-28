@@ -11,5 +11,6 @@ export function useUserData() {
         queryFn: fetchUserData,
         enabled: !!userId,
         staleTime: 1000 * 60 * 5, // 5 Minuten Cache
+        refetchOnWindowFocus: true,
     });
 }

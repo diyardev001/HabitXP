@@ -1,8 +1,13 @@
-import {ScrollView, StyleSheet, View} from 'react-native';
+import {ScrollView, StyleSheet, Text, View} from 'react-native';
 import React, {useEffect, useState} from 'react';
 import SpaceCard from './SpaceCard';
-import {Colors} from '@/constants/Colors';
-import CreateSpaceModal from '../Modals/CreateSpaceModal';
+import {useSpaces} from "@/hooks/useSpaces";
+import {useTasks} from "@/hooks/useTasks";
+import {Space} from "@/types/space";
+import CreateSpaceModal from "@/components/Modals/CreateSpaceModal";
+import {createSpace, updateSpace} from "@/services/spaceService";
+import {queryClient} from "@/lib/queryClient";
+import {useAuth} from "@/context/AuthContext";
 
 interface SpaceListProps {
     shouldShowModal?: boolean;
@@ -10,55 +15,17 @@ interface SpaceListProps {
 
 const SpaceList = ({shouldShowModal}: SpaceListProps) => {
     const [isModalVisible, setIsModalVisible] = useState(false);
-    const [sections, setSections] = useState([
-        {
-            name: 'Gesundheit',
-            xp: 12,
-            xpMax: 1000,
-            coins: 20,
-            data: [
-                {name: 'Fitness', bg: Colors.habit.green.bg, ac: Colors.habit.green.ac},
-                {name: 'Yoga', bg: Colors.habit.pink.bg, ac: Colors.habit.pink.ac},
-                {
-                    name: 'Wasser trinken',
-                    bg: Colors.habit.blue.bg,
-                    ac: Colors.habit.blue.ac,
-                },
-            ],
-        },
-        {
-            name: 'Entspannung',
-            xp: 52,
-            xpMax: 500,
-            coins: 10,
-            data: [
-                {
-                    name: 'Meditation',
-                    bg: Colors.habit.coral.bg,
-                    ac: Colors.habit.coral.ac,
-                },
-                {
-                    name: 'Schlafen',
-                    bg: Colors.habit.orange.bg,
-                    ac: Colors.habit.orange.ac,
-                },
-            ],
-        },
-        {
-            name: 'Hobbys',
-            xp: 552,
-            xpMax: 1000,
-            coins: 20,
-            data: [
-                {name: 'Kochen', bg: Colors.habit.cyan.bg, ac: Colors.habit.cyan.ac},
-                {
-                    name: 'Programmieren',
-                    bg: Colors.habit.green.bg,
-                    ac: Colors.habit.green.ac,
-                },
-            ],
-        },
-    ]);
+    const [spaceToEdit, setSpaceToEdit] = useState<Space | null>(null);
+    const [openDropdownId, setOpenDropdownId] = useState<string | null>(null);
+    const {user} = useAuth();
+
+    const {data: spaces = [], isLoading, isError} = useSpaces();
+    const {data: tasks = []} = useTasks();
+
+    const handleEdit = (space: Space) => {
+        setSpaceToEdit(space);
+        setIsModalVisible(true);
+    };
 
     // Update isModalVisible when shouldShowModal changes
     useEffect(() => {
@@ -67,46 +34,55 @@ const SpaceList = ({shouldShowModal}: SpaceListProps) => {
         }
     }, [shouldShowModal]);
 
-    const handleCloseModal = () => {
-        setIsModalVisible(false);
-    };
-
-    const handleAddSpace = (name: string) => {
-        if (name.trim()) {
-            setSections(prevSections => [
-                ...prevSections,
-                {
-                    name,
-                    xp: 0,
-                    xpMax: 1000,
-                    coins: 0,
-                    data: [],
-                }
-            ]);
-        }
-        handleCloseModal();
-    };
 
     return (
         <View style={styles.container}>
-            <ScrollView style={styles.scrollView}>
-                {sections.map((section, index) => (
+            <ScrollView
+                style={[styles.scrollView, {overflow: "visible"}]}
+                contentContainerStyle={{paddingBottom: 100}}
+            >
+                {isLoading && <Text style={{color: 'white'}}>Lade Spaces...</Text>}
+                {isError && <Text style={{color: 'red'}}>Fehler beim Laden</Text>}
+
+                {spaces.map((space: Space) => (
                     <SpaceCard
-                        key={index}
-                        name={section.name}
-                        xp={section.xp}
-                        xpMax={section.xpMax}
-                        coins={section.coins}
-                        data={section.data}
+                        key={space.id}
+                        space={space}
+                        tasks={tasks.filter(t => t.spaceId === space.id)}
+                        onEdit={handleEdit}
+                        openDropdownId={openDropdownId}
+                        setOpenDropdownId={setOpenDropdownId}
                     />
                 ))}
             </ScrollView>
 
-            <CreateSpaceModal
-                isVisible={isModalVisible}
-                onClose={handleCloseModal}
-                onDone={handleAddSpace}
-            />
+            {isModalVisible && (
+                <CreateSpaceModal
+                    isVisible={isModalVisible}
+                    initialData={spaceToEdit || undefined}
+                    isEditing={!!spaceToEdit}
+                    existingSpaces={spaces}
+                    onDone={async (name, colorKey) => {
+                        try {
+                            if (spaceToEdit) {
+                                await updateSpace(spaceToEdit.id, {colorKey});
+                            } else {
+                                await createSpace({name, colorKey, userId: user!.id});
+                            }
+                            await queryClient.invalidateQueries({queryKey: ['spaces']});
+                        } catch (error) {
+                            console.error("Fehler beim Erstellen/Aktualisieren des Spaces:", error);
+                        } finally {
+                            setIsModalVisible(false);
+                            setSpaceToEdit(null);
+                        }
+                    }}
+                    onClose={() => {
+                        setIsModalVisible(false);
+                        setSpaceToEdit(null);
+                    }}
+                />
+            )}
         </View>
     );
 };
