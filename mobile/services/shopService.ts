@@ -15,7 +15,6 @@ export const buyBonus = async (bonusId: string, userId: string): Promise<string>
         return res.data;
     } catch (err: any) {
         if (err.response) {
-            console.error("Fehler beim Kauf:", err.response.data);
             throw new Error(err.response.data);
         }
         throw err;
