@@ -1,4 +1,4 @@
-import {Dimensions, Image, Pressable, StyleSheet, Text, View} from 'react-native';
+import {Alert, Dimensions, Image, Pressable, StyleSheet, Text, View} from 'react-native';
 import React, {useState} from 'react';
 import Container from '@/components/Container';
 import useTheme from '@/hooks/useTheme';
@@ -11,6 +11,7 @@ import {Ionicons} from "@expo/vector-icons";
 import BonusAlreadyActiveModal from "@/components/shop/BonusAlreadyActiveModal";
 import NotEnoughCoinsModal from "@/components/shop/NotEnoughCoinsModal";
 import UnknownErrorModal from "@/components/shop/UnknownErrorModal";
+import { queryClient } from '@/lib/queryClient';
 
 const coinIcon = require('../../assets/images/icons/gamification/coin.png');
 
@@ -21,7 +22,7 @@ const getIconForBonusType = (type: string) => {
         case "XP_BOOST":
             return <Ionicons name="star" size={24} color="#f1c40f" />;
         case "StreakFreeze":
-            return <Ionicons name="flame" size={24} color="#ff6c00" /> ;
+            return <Ionicons name="snow" size={24} color="#AEE5F9" /> ;
         default:
             return null;
     }
